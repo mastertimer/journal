@@ -134,12 +134,14 @@
     <ClCompile Include="..\library\basic.cpp" />
     <ClCompile Include="..\library\geometry.cpp" />
     <ClCompile Include="..\library\graphics.cpp" />
+    <ClCompile Include="..\library\ui.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\library\basic.h" />
     <ClInclude Include="..\library\geometry.h" />
     <ClInclude Include="..\library\graphics.h" />
+    <ClInclude Include="..\library\ui.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
