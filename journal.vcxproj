@@ -70,6 +70,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -104,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\library;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\mutator\library;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
@@ -120,7 +126,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\library;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\mutator\library;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
@@ -131,19 +137,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\library\basic.cpp" />
-    <ClCompile Include="..\library\geometry.cpp" />
-    <ClCompile Include="..\library\graphics.cpp" />
-    <ClCompile Include="..\library\ui.cpp" />
-    <ClCompile Include="..\library\win_basic.cpp" />
+    <ClCompile Include="..\mutator\library\basic.cpp" />
+    <ClCompile Include="..\mutator\library\geometry.cpp" />
+    <ClCompile Include="..\mutator\library\graphics.cpp" />
+    <ClCompile Include="..\mutator\library\ui.cpp" />
+    <ClCompile Include="..\mutator\library\win_basic.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\library\basic.h" />
-    <ClInclude Include="..\library\geometry.h" />
-    <ClInclude Include="..\library\graphics.h" />
-    <ClInclude Include="..\library\ui.h" />
-    <ClInclude Include="..\library\win_basic.h" />
+    <ClInclude Include="..\mutator\library\basic.h" />
+    <ClInclude Include="..\mutator\library\geometry.h" />
+    <ClInclude Include="..\mutator\library\graphics.h" />
+    <ClInclude Include="..\mutator\library\ui.h" />
+    <ClInclude Include="..\mutator\library\win_basic.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

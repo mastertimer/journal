@@ -18,36 +18,36 @@
     <ClCompile Include="main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\library\basic.cpp">
+    <ClCompile Include="..\mutator\library\basic.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\library\geometry.cpp">
+    <ClCompile Include="..\mutator\library\geometry.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\library\graphics.cpp">
+    <ClCompile Include="..\mutator\library\graphics.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\library\ui.cpp">
+    <ClCompile Include="..\mutator\library\ui.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\library\win_basic.cpp">
+    <ClCompile Include="..\mutator\library\win_basic.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\library\basic.h">
+    <ClInclude Include="..\mutator\library\basic.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\library\geometry.h">
+    <ClInclude Include="..\mutator\library\geometry.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\library\graphics.h">
+    <ClInclude Include="..\mutator\library\graphics.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\library\ui.h">
+    <ClInclude Include="..\mutator\library\ui.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\library\win_basic.h">
+    <ClInclude Include="..\mutator\library\win_basic.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
