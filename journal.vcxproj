@@ -132,7 +132,6 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="journal.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="journal.cpp" />
