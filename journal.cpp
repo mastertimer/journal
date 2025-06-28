@@ -1,28 +1,5 @@
-﻿// journal.cpp : Определяет точку входа для приложения.
-//
-
-#include "framework.h"
+﻿#include "framework.h"
 #include "journal.h"
-
-HINSTANCE hInst;                                // текущий экземпляр
-
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
-{
-   hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
-
-   HWND hWnd = CreateWindowW(L"JournalWindowClass", L"journal", WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
-
-   if (!hWnd)
-   {
-      return FALSE;
-   }
-
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
-
-   return TRUE;
-}
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -32,7 +9,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Добавьте сюда любой код прорисовки, использующий HDC...
             EndPaint(hWnd, &ps);
         }
         break;
@@ -50,7 +26,6 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     WNDCLASSEXW wcex;
 
     wcex.cbSize = sizeof(WNDCLASSEX);
-
     wcex.style = CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc = WndProc;
     wcex.cbClsExtra = 0;
@@ -68,23 +43,15 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
-
-    // TODO: Разместите код здесь.
-
-    // Инициализация глобальных строк
     MyRegisterClass(hInstance);
 
-    // Выполнить инициализацию приложения:
-    if (!InitInstance (hInstance, nCmdShow))
-    {
-        return FALSE;
-    }
+    HWND hWnd = CreateWindowW(L"JournalWindowClass", L"journal", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+    if (!hWnd) return 0;
+    ShowWindow(hWnd, nCmdShow);
+    UpdateWindow(hWnd);
 
     MSG msg;
 
-    // Цикл основного сообщения:
     while (GetMessage(&msg, nullptr, 0, 0))
     {
         TranslateMessage(&msg);
@@ -93,4 +60,3 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     return (int) msg.wParam;
 }
-
