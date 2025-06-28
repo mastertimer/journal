@@ -34,10 +34,10 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hInstance = hInstance;
     wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(101));
     wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.hbrBackground = 0;
     wcex.lpszMenuName = 0;
     wcex.lpszClassName = L"JournalWindowClass";
-    wcex.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(101));
+    wcex.hIconSm = (HICON)LoadImageW(hInstance, MAKEINTRESOURCE(101), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
 
     return RegisterClassExW(&wcex);
 }
