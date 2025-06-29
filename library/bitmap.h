@@ -2,6 +2,11 @@
 
 #include "geometry.h"
 
+#include <SDKDDKVer.h>
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union color
@@ -29,7 +34,8 @@ union color
 
 struct picture
 {
-    explicit picture(size2i s);
+    explicit picture(size2i s, bool allocate_memory = true);
+	~picture();
 
 protected:
 	color* data = nullptr;
@@ -42,5 +48,13 @@ protected:
 
 struct bitmap : public picture
 {
+	HBITMAP hbm = nullptr;
+	HDC hdc = nullptr;
+	HFONT hfont = nullptr;
+	LOGFONT font = {};
+	uint f_c = 0; // цвет шрифта
+	uint f_cf = 0; // цвет фона шрифта
+
     explicit bitmap(size2i s);
+	~bitmap();
 };
