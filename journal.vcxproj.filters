@@ -13,10 +13,25 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Исходные файлы\library">
+      <UniqueIdentifier>{bedda706-5628-4794-9bfc-1f5bde490fec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\library">
+      <UniqueIdentifier>{0117a99c-9cb8-4483-a5fc-bc3815c00de3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="journal.cpp">
       <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="library\bitmap.cpp">
+      <Filter>Исходные файлы\library</Filter>
+    </ClCompile>
+    <ClCompile Include="library\geometry.cpp">
+      <Filter>Исходные файлы\library</Filter>
+    </ClCompile>
+    <ClCompile Include="library\core.cpp">
+      <Filter>Исходные файлы\library</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -28,5 +43,16 @@
     <Image Include="journal.ico">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="library\bitmap.h">
+      <Filter>Файлы заголовков\library</Filter>
+    </ClInclude>
+    <ClInclude Include="library\geometry.h">
+      <Filter>Файлы заголовков\library</Filter>
+    </ClInclude>
+    <ClInclude Include="library\core.h">
+      <Filter>Файлы заголовков\library</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

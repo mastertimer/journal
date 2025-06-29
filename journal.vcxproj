@@ -130,12 +130,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="journal.cpp" />
+    <ClCompile Include="library\bitmap.cpp" />
+    <ClCompile Include="library\core.cpp" />
+    <ClCompile Include="library\geometry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="journal.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="journal.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="library\bitmap.h" />
+    <ClInclude Include="library\core.h" />
+    <ClInclude Include="library\geometry.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

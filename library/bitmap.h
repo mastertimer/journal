@@ -1,0 +1,15 @@
+#pragma once
+
+#include "geometry.h"
+
+struct picture
+{
+
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct bitmap : public picture
+{
+    explicit bitmap(size2i r);
+};
