@@ -14,10 +14,10 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Исходные файлы\library">
-      <UniqueIdentifier>{bedda706-5628-4794-9bfc-1f5bde490fec}</UniqueIdentifier>
+      <UniqueIdentifier>{c8523861-11c5-44ab-a9dd-640aa4695e67}</UniqueIdentifier>
     </Filter>
     <Filter Include="Файлы заголовков\library">
-      <UniqueIdentifier>{0117a99c-9cb8-4483-a5fc-bc3815c00de3}</UniqueIdentifier>
+      <UniqueIdentifier>{a76feda0-8178-484e-8730-3ea63f69d19d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -27,10 +27,10 @@
     <ClCompile Include="library\bitmap.cpp">
       <Filter>Исходные файлы\library</Filter>
     </ClCompile>
-    <ClCompile Include="library\geometry.cpp">
+    <ClCompile Include="library\core.cpp">
       <Filter>Исходные файлы\library</Filter>
     </ClCompile>
-    <ClCompile Include="library\core.cpp">
+    <ClCompile Include="library\geometry.cpp">
       <Filter>Исходные файлы\library</Filter>
     </ClCompile>
   </ItemGroup>
@@ -48,10 +48,10 @@
     <ClInclude Include="library\bitmap.h">
       <Filter>Файлы заголовков\library</Filter>
     </ClInclude>
-    <ClInclude Include="library\geometry.h">
+    <ClInclude Include="library\core.h">
       <Filter>Файлы заголовков\library</Filter>
     </ClInclude>
-    <ClInclude Include="library\core.h">
+    <ClInclude Include="library\geometry.h">
       <Filter>Файлы заголовков\library</Filter>
     </ClInclude>
   </ItemGroup>
