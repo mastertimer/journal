@@ -22,7 +22,7 @@ bitmap::bitmap(size2i s) : picture(s, false)
 	font.lfCharSet        = DEFAULT_CHARSET; // набор символов
 	wcsncpy_s(font.lfFaceName, LF_FACESIZE, L"Tahoma", LF_FACESIZE - 1);
 
-	BITMAPINFO bmi = { sizeof(BITMAPINFOHEADER), (long)s.x, (long) - s.y, 1, 32, BI_RGB, 0, 0, 0, 0, 0};
+	BITMAPINFO bmi = { sizeof(BITMAPINFOHEADER), (long)s.x, -(long)s.y, 1, 32, BI_RGB, 0, 0, 0, 0, 0 };
 	if (hbm = CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS, (void**)(&data), 0, 0); !hbm) return;
 	if (hdc = CreateCompatibleDC(nullptr); !hdc) return;
 	SelectObject(hdc, hbm);
