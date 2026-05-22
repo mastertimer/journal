@@ -17,9 +17,6 @@ union color
 		uchar b, g, r, a;
 	};
 
-	color() = default;
-	constexpr color(uint c2) : c(c2) {}
-
 	operator uint() const { return c; }
 
 	color& operator=(uint c2) { c = c2; return *this; }
@@ -34,8 +31,14 @@ union color
 
 struct picture
 {
-    explicit picture(size2i s, bool allocate_memory = true);
-	~picture();
+	explicit picture(size2i s, bool allocate_memory = true);
+	virtual ~picture();
+	picture(const picture& copy);
+	picture(picture&& move) noexcept;
+	picture& operator=(picture&& move) noexcept;
+	picture& operator=(const picture& copy);
+
+	virtual bool resize(size2i wh);
 
 protected:
 	color* data = nullptr;
