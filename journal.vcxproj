@@ -147,7 +147,7 @@
   <ItemGroup>
     <ClCompile Include="journal.cpp" />
     <ClCompile Include="library\bitmap.cpp" />
-    <ClCompile Include="library\core.cpp" />
+    <ClCompile Include="library\base.cpp" />
     <ClCompile Include="library\geometry.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -158,7 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="library\bitmap.h" />
-    <ClInclude Include="library\core.h" />
+    <ClInclude Include="library\base.h" />
     <ClInclude Include="library\geometry.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
