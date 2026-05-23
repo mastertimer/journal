@@ -66,21 +66,39 @@ bool picture::resize(size2i wh)
 
 bitmap::bitmap(size2i s) : picture(s, false)
 {
-	BITMAPINFO bmi = { sizeof(BITMAPINFOHEADER), (long)s.x, -(long)s.y, 1, 32, BI_RGB, 0, 0, 0, 0, 0 };
-	if (hbm = CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS, (void**)(&data), 0, 0); !hbm) return;
-	if (hdc = CreateCompatibleDC(nullptr); !hdc)
-	{
-		DeleteObject(hbm);
-		hbm = nullptr;
-		data = nullptr;
-		return;
-	}
-	SelectObject(hdc, hbm);
+	hdc = CreateCompatibleDC(nullptr);
+	if (hdc) resize(s);
 }
 
 bitmap::~bitmap()
 {
-	DeleteDC(hdc);
 	DeleteObject(hbm);
+	DeleteDC(hdc);
 	data = nullptr;
+}
+
+bool bitmap::resize(size2i wh)
+{
+	if (size == wh) return false;
+
+	HBITMAP new_hbm = nullptr;
+	color* new_data = nullptr;
+
+	if (!wh.empty())
+	{
+		BITMAPINFO bmi = { sizeof(BITMAPINFOHEADER), (long)wh.x, -(long)wh.y, 1, 32, BI_RGB };
+		new_hbm = CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS, (void**)&new_data, 0, 0);
+		if (!new_hbm) return false;
+		SelectObject(hdc, new_hbm);
+	}
+
+	DeleteObject(hbm);
+
+	hbm = new_hbm;
+	data = new_data;
+	size = wh;
+	drawing_rect = size;
+	transparent = false;
+
+	return true;
 }

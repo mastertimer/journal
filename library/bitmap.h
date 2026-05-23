@@ -61,4 +61,6 @@ struct bitmap : public picture
 	bitmap& operator=(const bitmap&) = delete;
 
 	~bitmap();
+
+	bool resize(size2i wh) override;
 };
