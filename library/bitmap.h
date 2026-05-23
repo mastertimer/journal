@@ -27,6 +27,8 @@ union color
 	bool operator!=(const uint color_) const { return c != color_; }
 };
 
+static_assert(sizeof(color) == 4);
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct picture
@@ -51,13 +53,12 @@ protected:
 
 struct bitmap : public picture
 {
-	HBITMAP hbm = nullptr;
 	HDC hdc = nullptr;
-	HFONT hfont = nullptr;
-	LOGFONT font = {};
-	uint f_c = 0; // цвет шрифта
-	uint f_cf = 0; // цвет фона шрифта
+	HBITMAP hbm = nullptr;
 
     explicit bitmap(size2i s);
+	bitmap(const bitmap&) = delete;
+	bitmap& operator=(const bitmap&) = delete;
+
 	~bitmap();
 };

@@ -13,7 +13,7 @@ picture::~picture()
 	delete[] data;
 }
 
-picture::picture(const picture& copy) : size(copy.size), transparent(copy.transparent), drawing_rect(copy.size)
+picture::picture(const picture& copy) : size(copy.size), transparent(copy.transparent), drawing_rect(copy.drawing_rect)
 {
 	if (size.empty()) return;
 	data = new color[size.square()];
@@ -52,9 +52,10 @@ picture& picture::operator=(picture&& move) noexcept
 bool picture::resize(size2i wh)
 {
 	if (size == wh) return false;
-	size = wh;
+	auto new_data = (wh.empty()) ? nullptr : new color[wh.square()];
 	delete[] data;
-	data = (size.empty()) ? nullptr : new color[size.square()];
+	data = new_data;
+	size = wh;
 	drawing_rect = size;
 	transparent = false;
 	return true;
@@ -65,23 +66,21 @@ bool picture::resize(size2i wh)
 
 bitmap::bitmap(size2i s) : picture(s, false)
 {
-	font.lfHeight         = 13;              // высота шрифта или символа
-	font.lfWeight         = 100;             // толщина шрифта в диапазоне от 0 до 1000
-	font.lfCharSet        = DEFAULT_CHARSET; // набор символов
-	wcsncpy_s(font.lfFaceName, LF_FACESIZE, L"Tahoma", LF_FACESIZE - 1);
-
 	BITMAPINFO bmi = { sizeof(BITMAPINFOHEADER), (long)s.x, -(long)s.y, 1, 32, BI_RGB, 0, 0, 0, 0, 0 };
 	if (hbm = CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS, (void**)(&data), 0, 0); !hbm) return;
-	if (hdc = CreateCompatibleDC(nullptr); !hdc) return;
+	if (hdc = CreateCompatibleDC(nullptr); !hdc)
+	{
+		DeleteObject(hbm);
+		hbm = nullptr;
+		data = nullptr;
+		return;
+	}
 	SelectObject(hdc, hbm);
-	f_c = GetTextColor(hdc);
-	f_cf = GetBkColor(hdc);
 }
 
 bitmap::~bitmap()
 {
-	DeleteObject(hfont);
-	DeleteObject(hbm);
 	DeleteDC(hdc);
+	DeleteObject(hbm);
 	data = nullptr;
 }
