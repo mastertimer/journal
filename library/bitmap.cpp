@@ -5,7 +5,7 @@
 picture::picture(size2i s, bool allocate_memory)
 {
 	drawing_rect = size = s;
-	if (!size.empty() && allocate_memory) data = new color[size.square()];
+	if (!size.empty() && allocate_memory) data = new color[size.count()];
 }
 
 picture::~picture()
@@ -16,8 +16,8 @@ picture::~picture()
 picture::picture(const picture& copy) : size(copy.size), transparent(copy.transparent), drawing_rect(copy.drawing_rect)
 {
 	if (size.empty()) return;
-	data = new color[size.square()];
-	memcpy(data, copy.data, size.square() * sizeof(color));
+	data = new color[size.count()];
+	memcpy(data, copy.data, size.count() * sizeof(color));
 }
 
 picture::picture(picture&& move) noexcept : data(move.data), size(move.size), transparent(move.transparent),
@@ -32,7 +32,7 @@ picture& picture::operator=(const picture& copy)
 	if (&copy == this) return *this;
 	resize(copy.size);
 	transparent = copy.transparent;
-	memcpy(data, copy.data, size.square() * sizeof(color));
+	memcpy(data, copy.data, size.count() * sizeof(color));
 	return *this;
 }
 
@@ -52,7 +52,7 @@ picture& picture::operator=(picture&& move) noexcept
 bool picture::resize(size2i wh)
 {
 	if (size == wh) return false;
-	auto new_data = (wh.empty()) ? nullptr : new color[wh.square()];
+	auto new_data = (wh.empty()) ? nullptr : new color[wh.count()];
 	delete[] data;
 	data = new_data;
 	size = wh;

@@ -10,7 +10,7 @@ struct size2i // [0...x), [0...y)
 	i64 y = 0;
 
 	bool empty()  const { return (x <= 0) || (y <= 0); }
-	i64  square() const { return empty() ? 0 : x * y; }
+	i64  count() const { return empty() ? 0 : x * y; }
 	bool operator==(const size2i s) const { return ((x == s.x) && (y == s.y)) || (empty() && s.empty()); }
 };
 
