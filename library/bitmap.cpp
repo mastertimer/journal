@@ -2,10 +2,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-picture::picture(size2i s, bool allocate_memory)
+picture::picture(size2i s)
 {
 	drawing_rect = size = s;
-	if (!size.empty() && allocate_memory) data = new color[size.count()];
+	if (!size.empty()) data = new color[size.count()];
 }
 
 picture::~picture()
@@ -64,7 +64,7 @@ bool picture::resize(size2i wh)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bitmap::bitmap(size2i s) : picture(s, false)
+bitmap::bitmap(size2i s) : picture({0,0})
 {
 	hdc = CreateCompatibleDC(nullptr);
 	if (hdc) resize(s);
@@ -72,8 +72,8 @@ bitmap::bitmap(size2i s) : picture(s, false)
 
 bitmap::~bitmap()
 {
-	DeleteObject(hbm);
 	DeleteDC(hdc);
+	DeleteObject(hbm);
 	data = nullptr;
 }
 
@@ -89,7 +89,11 @@ bool bitmap::resize(size2i wh)
 		BITMAPINFO bmi = { sizeof(BITMAPINFOHEADER), (long)wh.x, -(long)wh.y, 1, 32, BI_RGB };
 		new_hbm = CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS, (void**)&new_data, 0, 0);
 		if (!new_hbm) return false;
-		SelectObject(hdc, new_hbm);
+		if (!SelectObject(hdc, new_hbm))
+		{
+			DeleteObject(new_hbm);
+			return false;
+		}
 	}
 
 	DeleteObject(hbm);
@@ -101,4 +105,73 @@ bool bitmap::resize(size2i wh)
 	transparent = false;
 
 	return true;
+}
+
+bitmap::bitmap(const bitmap& copy) : picture({0,0})
+{
+	hdc = CreateCompatibleDC(nullptr);
+
+	if (!hdc) return;
+	resize(copy.size);
+
+	transparent = copy.transparent;
+	drawing_rect = copy.drawing_rect;
+
+	memcpy(data, copy.data, size.count() * sizeof(color));
+}
+
+bitmap::bitmap(bitmap&& move) noexcept :picture({0,0}), hdc(move.hdc), hbm(move.hbm)
+{
+	data = move.data;
+	size = move.size;
+	transparent = move.transparent;
+	drawing_rect = move.drawing_rect;
+
+	move.hdc = nullptr;
+	move.hbm = nullptr;
+	move.data = nullptr;
+	move.drawing_rect = move.size = { 0,0 };
+}
+
+bitmap& bitmap::operator=(const bitmap& copy)
+{
+	if (&copy == this) return *this;
+
+	if (!hdc)
+	{
+		hdc = CreateCompatibleDC(nullptr);
+		if (!hdc) return *this;
+	}
+
+	resize(copy.size);
+
+	transparent = copy.transparent;
+	drawing_rect = copy.drawing_rect;
+
+	if (data && copy.data && size == copy.size) memcpy(data, copy.data, size.count() * sizeof(color));
+
+	return *this;
+}
+
+bitmap& bitmap::operator=(bitmap&& move) noexcept
+{
+	if (&move == this) return *this;
+
+	DeleteDC(hdc);
+	DeleteObject(hbm);
+
+	hdc = move.hdc;
+	hbm = move.hbm;
+
+	data = move.data;
+	size = move.size;
+	transparent = move.transparent;
+	drawing_rect = move.drawing_rect;
+
+	move.hdc = nullptr;
+	move.hbm = nullptr;
+	move.data = nullptr;
+	move.drawing_rect = move.size = { 0,0 };
+
+	return *this;
 }

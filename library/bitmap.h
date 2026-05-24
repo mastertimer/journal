@@ -21,10 +21,10 @@ union color
 
 	color& operator=(uint c2) { c = c2; return *this; }
 
-	bool operator==(const color color_) const { return c == color_.c; }
-	bool operator==(const uint color_) const { return c == color_; }
-	bool operator!=(const color color_) const { return c != color_.c; }
-	bool operator!=(const uint color_) const { return c != color_; }
+	bool operator==(color color_) const { return c == color_.c; }
+	bool operator==(uint color_) const { return c == color_; }
+	bool operator!=(color color_) const { return c != color_.c; }
+	bool operator!=(uint color_) const { return c != color_; }
 };
 
 static_assert(sizeof(color) == 4);
@@ -33,7 +33,7 @@ static_assert(sizeof(color) == 4);
 
 struct picture
 {
-	explicit picture(size2i s, bool allocate_memory = true);
+	explicit picture(size2i s);
 	virtual ~picture();
 	picture(const picture& copy);
 	picture(picture&& move) noexcept;
@@ -57,8 +57,12 @@ struct bitmap : public picture
 	HBITMAP hbm = nullptr;
 
     explicit bitmap(size2i s);
-	bitmap(const bitmap&) = delete;
-	bitmap& operator=(const bitmap&) = delete;
+
+	bitmap(const bitmap& copy);
+	bitmap(bitmap&& move) noexcept;
+
+	bitmap& operator=(const bitmap& copy);
+	bitmap& operator=(bitmap&& move) noexcept;
 
 	~bitmap();
 
