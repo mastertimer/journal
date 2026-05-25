@@ -2,6 +2,29 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#include "ui_scene.h"
+
+namespace
+{
+    ui_scene scene;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void paint(HWND hwnd, bool all = false)
+{
+    HDC hdc = GetDC(hwnd);
+    RECT rect;
+    GetClientRect(hwnd, &rect);
+    auto changed_rect = scene.draw({ rect.right, rect.bottom });
+    if (all) changed_rect = size2i(rect.right, rect.bottom);
+    if (!changed_rect.empty())
+        BitBlt(hdc, int(changed_rect.x.min), int(changed_rect.y.min), int(changed_rect.x.length()),
+            int(changed_rect.y.length()), scene.canvas.hdc, int(changed_rect.x.min), int(changed_rect.y.min),
+            SRCCOPY);
+    ReleaseDC(hwnd, hdc);
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -9,7 +32,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
+            BeginPaint(hWnd, &ps);
+            paint(hWnd, true);
             EndPaint(hWnd, &ps);
         }
         break;

@@ -56,7 +56,8 @@ struct bitmap : public picture
 	HDC hdc = nullptr;
 	HBITMAP hbm = nullptr;
 
-    explicit bitmap(size2i s);
+	bitmap();
+	explicit bitmap(size2i s);
 
 	bitmap(const bitmap& copy);
 	bitmap(bitmap&& move) noexcept;

@@ -20,6 +20,9 @@ struct rangei // [...)
 {
 	i64 min = 0;
 	i64 max = 0;
+
+	bool empty()  const { return (max <= min); }
+	i64  length() const { return (min < max) ? (max - min) : 0; }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,4 +33,6 @@ struct rect2i
 
 	rect2i() = default;
 	rect2i(size2i size) : x{ 0LL, size.x }, y{ 0LL, size.y } {}
+
+	bool empty() const;
 };
