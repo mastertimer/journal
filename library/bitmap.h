@@ -7,7 +7,7 @@
 #define NOMINMAX
 #include <windows.h>
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 union color
 {
@@ -26,10 +26,12 @@ union color
 	bool operator!=(color color_) const { return c != color_.c; }
 	bool operator!=(uint color_) const { return c != color_; }
 };
-
 static_assert(sizeof(color) == 4);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+constexpr color black_color = { 0xFF000000 };
+constexpr color white_color = { 0xFFFFFFFF };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct picture
 {
@@ -40,16 +42,28 @@ struct picture
 	picture& operator=(picture&& move) noexcept;
 	picture& operator=(const picture& copy);
 
+	const size2i& get_size() const { return size; }
 	virtual bool resize(size2i wh);
+	void set_drawing_rect(const recti& q);
+
+	void clear(color c = { 0xFF000000 });
+	void fill_rectangle(recti r, color c, bool rep = false);
 
 protected:
 	color* data = nullptr;
 	size2i size;
-	bool transparent = false; // есть полупрозрачные пиксели
-	rect2i drawing_rect; // разрешенная область для рисования
+	bool transparent = false; // требует альфа-смешивания
+	recti drawing_rect; // разрешенная область для рисования
+
+	color& pixel(const i64 x, const i64 y) { return data[y * size.x + x]; }
+	const color& pixel(const i64 x, const i64 y) const { return data[y * size.x + x]; }
+
+private:
+	template<typename Blender> void vertical_line(i64 x, intervali y, color c);
+	template<class Blender>	void fill_rectangle_impl(recti r, color c);
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct bitmap : public picture
 {

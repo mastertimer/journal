@@ -2,6 +2,113 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct blend_replace
+{
+	color cc;
+	blend_replace(color c) : cc(c) {}
+	void blend(color& c) const { c = cc; }
+	static void mix2(const color cc, color& c) { c = cc; }
+};
+
+struct blend_over_opaque
+{
+	uint kk;
+	uint d_b;
+	uint d_g;
+	uint d_r;
+
+	blend_over_opaque(color c) :
+		kk(255 - c.a),
+		d_b(c.b* (uint(c.a) + 1)),
+		d_g(c.g* (uint(c.a) + 1)),
+		d_r(c.r* (uint(c.a) + 1))
+	{
+	}
+
+	void blend(color& c) const
+	{
+		c.b = (c.b * kk + d_b) >> 8;
+		c.g = (c.g * kk + d_g) >> 8;
+		c.r = (c.r * kk + d_r) >> 8;
+	}
+
+	static void mix2(const color cc, color& c)
+	{
+		uint kk = 255 - cc.a;
+		uint k2 = uint(cc.a) + 1;
+		c.b = (c.b * kk + cc.b * k2) >> 8;
+		c.g = (c.g * kk + cc.g * k2) >> 8;
+		c.r = (c.r * kk + cc.r * k2) >> 8;
+	}
+
+	static void mixmix2(const color cc1, const color cc2, color& c)
+	{
+		uint k1 = cc1.a;
+		uint k2 = cc2.a;
+		uint kk = 256 - cc1.a - cc2.a;
+		c.b = (c.b * kk + cc1.b * k1 + cc2.b * k2) >> 8;
+		c.g = (c.g * kk + cc1.g * k1 + cc2.g * k2) >> 8;
+		c.r = (c.r * kk + cc1.r * k1 + cc2.r * k2) >> 8;
+	}
+};
+
+struct blend_over_alpha
+{
+	uint kk;
+	uint d_b;
+	uint d_g;
+	uint d_r;
+
+	blend_over_alpha(color c)
+	{
+		kk = 255 - c.a;
+		uint k2 = (uint(c.a) + 1) * 255;
+		d_b = c.b * k2;
+		d_g = c.g * k2;
+		d_r = c.r * k2;
+	}
+
+	void blend(color& c) const
+	{
+		uint kk_ = 255 - c.a;
+		uint k2_ = (uint(c.a) + 1) * kk;
+		uint znam = 65535 - kk * kk_;
+		c.b = (c.b * k2_ + d_b) / znam;
+		c.g = (c.g * k2_ + d_g) / znam;
+		c.r = (c.r * k2_ + d_r) / znam;
+		c.a = 255 - ((kk_ * kk) >> 8);
+	}
+
+	static void mix2(const color cc, color& c)
+	{
+		uint kk = 255 - cc.a;
+		uint k2 = (uint(cc.a) + 1) * 255;
+		uint kk_ = 255 - c.a;
+		uint k2_ = (uint(c.a) + 1) * kk;
+		uint znam = 65535 - kk * kk_;
+		c.b = (c.b * k2_ + cc.b * k2) / znam;
+		c.g = (c.g * k2_ + cc.g * k2) / znam;
+		c.r = (c.r * k2_ + cc.r * k2) / znam;
+		c.a = 255 - ((kk_ * kk) >> 8);
+	}
+
+	static void mixmix2(const color cc1, const color cc2, color& c)
+	{
+		uint kk = 256 - cc1.a - cc2.a;
+		uint k1 = uint(cc1.a) * 255;
+		uint k2 = uint(cc2.a) * 255;
+		uint kk_ = 255 - c.a;
+		uint k0 = (uint(c.a) + 1) * kk;
+		uint znam = 65535 - kk * kk_;
+		c.b = (c.b * k0 + cc1.b * k1 + cc2.b * k2) / znam;
+		c.g = (c.g * k0 + cc1.g * k1 + cc2.g * k2) / znam;
+		c.r = (c.r * k0 + cc1.r * k1 + cc2.r * k2) / znam;
+		c.a = 255 - ((kk_ * kk) >> 8);
+	}
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 picture::picture(size2i s)
 {
 	drawing_rect = size = s;
@@ -61,6 +168,64 @@ bool picture::resize(size2i wh)
 	return true;
 }
 
+void picture::set_drawing_rect(const recti& q)
+{
+	drawing_rect = q & size;
+}
+
+void picture::clear(color c)
+{
+	if (drawing_rect != size)
+		fill_rectangle(size, c, true);
+	else
+	{
+		transparent = c.a != 0xff;
+		std::fill_n(data, size.count(), c);
+	}
+}
+
+template<class Blender> void picture::vertical_line(i64 x, intervali y, color c)
+{
+	if (c.a == 0) return;
+	if (!drawing_rect.x.test(x)) return;
+	y &= drawing_rect.y;
+	if (y.empty()) return;
+	if (std::is_same<blend_replace, Blender>::value) transparent |= c.a != 0xff;
+	Blender cmix(c);
+	color* cс_max = &pixel(x, y.max);
+	for (auto cc = &pixel(x, y.min); cc < cс_max; cc += size.x) cmix.blend(*cc);
+}
+
+template<class Blender> void picture::fill_rectangle_impl(recti r, color c)
+{
+	if (r.x.length() == 1)
+	{
+		vertical_line<Blender>(r.x.min, r.y, c);
+		return;
+	}
+	Blender cmix(c);
+	for (i64 y = r.y.min; y < r.y.max; y++)
+	{
+		color* cс_max = &pixel(r.x.max, y);
+		for (auto cc = &pixel(r.x.min, y); cc < cс_max; cc++) cmix.blend(*cc);
+	}
+}
+
+void picture::fill_rectangle(recti r, color c, bool rep)
+{
+	if (c.a == 0 && !rep) return;
+	r &= drawing_rect;
+	if (r.empty()) return;
+	if (rep || c.a == 0xff)
+	{
+		transparent |= c.a != 0xff;
+		fill_rectangle_impl<blend_replace>(r, c);
+	}
+	else if (transparent)
+		fill_rectangle_impl<blend_over_alpha>(r, c);
+	else
+		fill_rectangle_impl<blend_over_opaque>(r, c);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

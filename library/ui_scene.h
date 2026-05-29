@@ -5,7 +5,9 @@
 struct ui_scene
 {
 	bitmap canvas;
-	rect2i changed_rect;
+	rect changed_rect;
 
-	rect2i draw(size2i s);
+	color background_color = black_color; // цвет фона
+
+	recti draw(size2i s);
 };
