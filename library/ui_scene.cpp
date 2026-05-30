@@ -7,7 +7,7 @@ recti ui_scene::draw(size2i s)
 	canvas.set_drawing_rect(changed_rect);
 	changed_rect &= canvas.get_size();
 	canvas.clear(background_color);
-//	n_ko->ris(_trans());
+	if (root) root->draw({});
 	recti result = changed_rect;
 	changed_rect = rect();
 	return result;

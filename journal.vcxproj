@@ -151,6 +151,7 @@
     <ClCompile Include="library\bitmap.cpp" />
     <ClCompile Include="library\base.cpp" />
     <ClCompile Include="library\geometry.cpp" />
+    <ClCompile Include="library\ui_elements.cpp" />
     <ClCompile Include="library\ui_scene.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +164,7 @@
     <ClInclude Include="library\bitmap.h" />
     <ClInclude Include="library\base.h" />
     <ClInclude Include="library\geometry.h" />
+    <ClInclude Include="library\ui_elements.h" />
     <ClInclude Include="library\ui_scene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
