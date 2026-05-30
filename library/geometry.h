@@ -4,6 +4,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct interval;
+struct rect;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct ixy // индекс, номер
 {
 	i64 x;
@@ -29,10 +34,15 @@ struct intervali // [...)
 
 	intervali() = default;
 	intervali(i64 min_, i64 max_) : min(min_), max(max_) {}
-	intervali(struct interval b);
+	intervali(interval b);
 
-	void operator&=(const intervali b) { if (b.min > min) min = b.min; if (b.max < max) max = b.max; }
-	intervali operator&(const intervali b) const { return { std::max(min, b.min), std::min(max, b.max) }; }
+	intervali& operator&=(const intervali b)
+	{
+		if (b.min > min) min = b.min;
+		if (b.max < max) max = b.max;
+		return *this;
+	}
+	intervali operator&(const intervali b) const { return intervali(*this) &= b; }
 
 	bool empty()  const { return (max <= min); }
 	i64  length() const { return (min < max) ? (max - min) : 0; }
@@ -48,9 +58,9 @@ struct recti
 	recti() = default;
 	recti(size2i size) : x{ 0LL, size.x }, y{ 0LL, size.y } {}
 	recti(intervali x_, intervali y_) : x{ x_ }, y{ y_ } {}
-	recti(const struct rect& r);
+	recti(const rect& r);
 
-	void operator&=(const recti&);
+	recti& operator&=(const recti&);
 	recti operator&(const recti&) const;
 	bool operator!=(const recti&) const;
 
@@ -66,7 +76,7 @@ struct interval // [...])
 	double max = 0.0;
 	bool   right_closed = true;
 
-	void operator&=(const interval& b);
+	interval& operator&=(const interval& b);
 
 	bool empty() const { return (max < min) || (max == min && !right_closed); }
 
@@ -82,7 +92,7 @@ struct rect
 	rect() = default;
 	rect(size2i b) : x{ 0.0, double(b.x), false }, y{ 0.0, double(b.y), false } {}
 
-	void operator&=(const rect& b);
+	rect& operator&=(const rect& b);
 
 	bool empty() const;
 };

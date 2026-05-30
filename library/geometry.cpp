@@ -25,10 +25,11 @@ recti::recti(const rect& r) : x{ r.x }, y{ r.y }
 {
 }
 
-void recti::operator&=(const recti& b)
+recti& recti::operator&=(const recti& b)
 {
 	x &= b.x;
 	y &= b.y;
+	return *this;
 }
 
 recti recti::operator&(const recti& b) const
@@ -44,7 +45,7 @@ bool recti::operator!=(const recti& b) const
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void interval::operator&=(const interval& b)
+interval& interval::operator&=(const interval& b)
 {
 	if (b.min > min) min = b.min;
 	if (b.max < max)
@@ -54,6 +55,7 @@ void interval::operator&=(const interval& b)
 	}
 	else
 		if (b.max == max) right_closed &= b.right_closed;
+	return *this;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,8 +65,9 @@ bool rect::empty() const
 	return x.empty() || y.empty();
 }
 
-void rect::operator&=(const rect& b)
+rect& rect::operator&=(const rect& b)
 {
 	x &= b.x;
 	y &= b.y;
+	return *this;
 }
