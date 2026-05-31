@@ -43,6 +43,12 @@ bool recti::operator!=(const recti& b) const
 	return (x.min != b.x.min) || (y.min != b.y.min) || (x.max != b.x.max) || (y.max != b.y.max);
 }
 
+bool recti::operator==(const recti& b) const
+{
+	if (b.empty() && empty()) return true;
+	return (x.min == b.x.min) && (y.min == b.y.min) && (x.max == b.x.max) && (y.max == b.y.max);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 interval& interval::operator&=(const interval& b)

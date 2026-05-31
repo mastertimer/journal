@@ -269,8 +269,8 @@ bool bitmap::resize(size2i wh)
 	hbm = new_hbm;
 	data = new_data;
 	size = wh;
-	drawing_rect = size;
 	transparent = false;
+	set_drawing_rect(size);
 
 	return true;
 }
@@ -283,7 +283,7 @@ bitmap::bitmap(const bitmap& copy) : picture({0,0})
 	resize(copy.size);
 
 	transparent = copy.transparent;
-	drawing_rect = copy.drawing_rect;
+	set_drawing_rect(copy.drawing_rect);
 
 	memcpy(data, copy.data, size.count() * sizeof(color));
 }
@@ -314,7 +314,7 @@ bitmap& bitmap::operator=(const bitmap& copy)
 	resize(copy.size);
 
 	transparent = copy.transparent;
-	drawing_rect = copy.drawing_rect;
+	set_drawing_rect(copy.drawing_rect);
 
 	if (data && copy.data && size == copy.size) memcpy(data, copy.data, size.count() * sizeof(color));
 
@@ -342,4 +342,19 @@ bitmap& bitmap::operator=(bitmap&& move) noexcept
 	move.drawing_rect = move.size = { 0,0 };
 
 	return *this;
+}
+
+void bitmap::set_drawing_rect(const recti& r)
+{
+	picture::set_drawing_rect(r);
+
+	if (drawing_rect == size)
+		SelectClipRgn(hdc, nullptr);
+	else
+	{
+		HRGN rgn = CreateRectRgn((int)drawing_rect.x.min, (int)drawing_rect.y.min,
+	                             (int)drawing_rect.x.max, (int)drawing_rect.y.max);
+		SelectClipRgn(hdc, rgn);
+		DeleteObject(rgn);
+	}
 }

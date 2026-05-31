@@ -73,6 +73,7 @@ struct recti
 	recti& operator&=(const recti&);
 	recti operator&(const recti&) const;
 	bool operator!=(const recti&) const;
+	bool operator==(const recti&) const;
 
 	bool empty() const;
 	bool test(ixy b) const;

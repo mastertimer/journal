@@ -82,4 +82,5 @@ struct bitmap : public picture
 	~bitmap();
 
 	bool resize(size2i wh) override;
+	void set_drawing_rect(const recti& r);
 };
