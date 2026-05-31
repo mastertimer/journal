@@ -271,6 +271,8 @@ bool bitmap::resize(size2i wh)
 	size = wh;
 	transparent = false;
 	set_drawing_rect(size);
+	tc_cur = GetTextColor(hdc);
+	bc_cur = GetBkColor(hdc);
 
 	return true;
 }
@@ -284,6 +286,8 @@ bitmap::bitmap(const bitmap& copy) : picture({0,0})
 
 	transparent = copy.transparent;
 	set_drawing_rect(copy.drawing_rect);
+	tc_cur = GetTextColor(hdc);
+	bc_cur = GetBkColor(hdc);
 
 	memcpy(data, copy.data, size.count() * sizeof(color));
 }
@@ -294,6 +298,8 @@ bitmap::bitmap(bitmap&& move) noexcept :picture({0,0}), hdc(move.hdc), hbm(move.
 	size = move.size;
 	transparent = move.transparent;
 	drawing_rect = move.drawing_rect;
+	tc_cur = move.tc_cur;
+	bc_cur = move.bc_cur;
 
 	move.hdc = nullptr;
 	move.hbm = nullptr;
@@ -315,6 +321,8 @@ bitmap& bitmap::operator=(const bitmap& copy)
 
 	transparent = copy.transparent;
 	set_drawing_rect(copy.drawing_rect);
+	tc_cur = GetTextColor(hdc);
+	bc_cur = GetBkColor(hdc);
 
 	if (data && copy.data && size == copy.size) memcpy(data, copy.data, size.count() * sizeof(color));
 
@@ -335,6 +343,8 @@ bitmap& bitmap::operator=(bitmap&& move) noexcept
 	size = move.size;
 	transparent = move.transparent;
 	drawing_rect = move.drawing_rect;
+	tc_cur = move.tc_cur;
+	bc_cur = move.bc_cur;
 
 	move.hdc = nullptr;
 	move.hbm = nullptr;
@@ -356,5 +366,22 @@ void bitmap::set_drawing_rect(const recti& r)
 	                             (int)drawing_rect.x.max, (int)drawing_rect.y.max);
 		SelectClipRgn(hdc, rgn);
 		DeleteObject(rgn);
+	}
+}
+
+void bitmap::set_text_colors(color tc, color bc)
+{
+	tc = { .b = tc.r, .g = tc.g, .r = tc.b, .a = 0 };
+	bc = { .b = bc.r, .g = bc.g, .r = bc.b, .a = bc.a };
+
+	if (tc != tc_cur) SetTextColor(hdc, tc_cur = tc);
+	if (bc != bc_cur)
+	{
+		if (bc >> 24 == 0xff) {
+			SetBkColor(hdc, bc & 0xffffff);
+			if (bc_cur >> 24 != 0xff) SetBkMode(hdc, OPAQUE);
+		}
+		else SetBkMode(hdc, TRANSPARENT);
+		bc_cur = bc;
 	}
 }
