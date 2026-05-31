@@ -153,6 +153,7 @@
     <ClCompile Include="library\geometry.cpp" />
     <ClCompile Include="library\ui_elements.cpp" />
     <ClCompile Include="library\ui_scene.cpp" />
+    <ClCompile Include="library\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="journal.rc" />
@@ -166,6 +167,7 @@
     <ClInclude Include="library\geometry.h" />
     <ClInclude Include="library\ui_elements.h" />
     <ClInclude Include="library\ui_scene.h" />
+    <ClInclude Include="library\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

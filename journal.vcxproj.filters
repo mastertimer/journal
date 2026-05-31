@@ -39,6 +39,9 @@
     <ClCompile Include="library\ui_elements.cpp">
       <Filter>Исходные файлы\library</Filter>
     </ClCompile>
+    <ClCompile Include="library\utils.cpp">
+      <Filter>Исходные файлы\library</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="journal.rc">
@@ -64,6 +67,9 @@
       <Filter>Файлы заголовков\library</Filter>
     </ClInclude>
     <ClInclude Include="library\ui_elements.h">
+      <Filter>Файлы заголовков\library</Filter>
+    </ClInclude>
+    <ClInclude Include="library\utils.h">
       <Filter>Файлы заголовков\library</Filter>
     </ClInclude>
   </ItemGroup>
