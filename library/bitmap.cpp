@@ -4,7 +4,7 @@
 
 namespace
 {
-std::array<std::wstring, 3> font_names = { L"Arial", L"Times New Roman", L"Courier New" };
+std::array<std::wstring, 3> font_names = { L"Cascadia Code", L"Times New Roman", L"Courier New" };
 
 struct blend_replace
 {
@@ -142,24 +142,24 @@ HFONT get_font_from_cache(i64 h, int id, bool bold)
 	if (f != fonts.end()) return f->second;
 
 	LOGFONT font{
-		.lfHeight = -fs.h,				// высота шрифта или символа
-		.lfWidth = 0,					// средняя ширина символов в шрифте
-		.lfEscapement = 0,				// угол, между вектором наклона и осью X устройства
-		.lfOrientation = 0,				// угол, между основной линией каждого символа и осью X устройства
-		.lfWeight = 100,				// толщина шрифта в диапазоне от 0 до 1000
-		.lfItalic = 0,					// курсивный шрифт
-		.lfUnderline = 0,				// подчеркнутый шрифт
-		.lfStrikeOut = 0,				// зачеркнутый шрифт
-		.lfCharSet = DEFAULT_CHARSET,	// набор символов
-		.lfOutPrecision = 0,			// точность вывода
-		.lfClipPrecision = 0,			// точность отсечения
-		.lfQuality = 0,					// качество вывода
-		.lfPitchAndFamily = 0,			// ширина символов и семейство шрифта
+		.lfHeight = -fs.h,							// высота шрифта или символа
+		.lfWidth = 0,								// средняя ширина символов в шрифте
+		.lfEscapement = 0,							// угол, между вектором наклона и осью X устройства
+		.lfOrientation = 0,							// угол, между основной линией каждого символа и осью X устройства
+		.lfWeight = fs.bold ? FW_BOLD : FW_NORMAL,	// толщина шрифта в диапазоне от 0 до 1000
+		.lfItalic = 0,								// курсивный шрифт
+		.lfUnderline = 0,							// подчеркнутый шрифт
+		.lfStrikeOut = 0,							// зачеркнутый шрифт
+		.lfCharSet = DEFAULT_CHARSET,				// набор символов
+		.lfOutPrecision = 0,						// точность вывода
+		.lfClipPrecision = 0,						// точность отсечения
+		.lfQuality = 0,								// качество вывода
+		.lfPitchAndFamily = 0,						// ширина символов и семейство шрифта
 	};
 	memcpy(font.lfFaceName, font_names[fs.id].c_str(), font_names[fs.id].size() * 2 + 2); // название шрифта
 
 	auto hfont = CreateFontIndirect(&font);
-	if (hfont) fonts[fs] = hfont;
+	if (hfont) fonts.emplace(fs, hfont);
 
 	return hfont;
 }
