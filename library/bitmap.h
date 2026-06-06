@@ -83,10 +83,9 @@ struct bitmap : public picture
 
 	bool resize(size2i wh) override;
 	void set_drawing_rect(const recti& r);
+	void text(ixy p, std::wstring_view s, int h, color tc, color bc = { 0 }, bool bold = false, int font_id = 0);
+	size2i size_text(std::wstring_view s, int h, bool bold = false, int font_id = 0);
 
 private:
-	color tc_cur = { 0 }; // цвет шрифта
-	color bc_cur = { 0 }; // цвет фона шрифта
 
-	void set_text_colors(color tc, color bc);
 };

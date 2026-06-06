@@ -330,8 +330,6 @@ bool bitmap::resize(size2i wh)
 	size = wh;
 	transparent = false;
 	set_drawing_rect(size);
-	tc_cur = GetTextColor(hdc);
-	bc_cur = GetBkColor(hdc);
 
 	return true;
 }
@@ -345,8 +343,6 @@ bitmap::bitmap(const bitmap& copy) : picture({0,0})
 
 	transparent = copy.transparent;
 	set_drawing_rect(copy.drawing_rect);
-	tc_cur = GetTextColor(hdc);
-	bc_cur = GetBkColor(hdc);
 
 	memcpy(data, copy.data, size.count() * sizeof(color));
 }
@@ -357,8 +353,6 @@ bitmap::bitmap(bitmap&& move) noexcept :picture({0,0}), hdc(move.hdc), hbm(move.
 	size = move.size;
 	transparent = move.transparent;
 	drawing_rect = move.drawing_rect;
-	tc_cur = move.tc_cur;
-	bc_cur = move.bc_cur;
 
 	move.hdc = nullptr;
 	move.hbm = nullptr;
@@ -380,8 +374,6 @@ bitmap& bitmap::operator=(const bitmap& copy)
 
 	transparent = copy.transparent;
 	set_drawing_rect(copy.drawing_rect);
-	tc_cur = GetTextColor(hdc);
-	bc_cur = GetBkColor(hdc);
 
 	if (data && copy.data && size == copy.size) memcpy(data, copy.data, size.count() * sizeof(color));
 
@@ -402,8 +394,6 @@ bitmap& bitmap::operator=(bitmap&& move) noexcept
 	size = move.size;
 	transparent = move.transparent;
 	drawing_rect = move.drawing_rect;
-	tc_cur = move.tc_cur;
-	bc_cur = move.bc_cur;
 
 	move.hdc = nullptr;
 	move.hbm = nullptr;
@@ -428,19 +418,28 @@ void bitmap::set_drawing_rect(const recti& r)
 	}
 }
 
-void bitmap::set_text_colors(color tc, color bc)
+void bitmap::text(ixy p, std::wstring_view s, int h, color tc, color bc, bool bold, int font_id)
 {
+	if ( tc.a == 0 || p.y > drawing_rect.y.max || p.x > drawing_rect.x.max || p.y + h < drawing_rect.y.min) return;
+	auto text_area = size_text(s, h, bold, font_id).move(p) & drawing_rect; // шрифт устанавливается в функции size_text
+	if (text_area.empty()) return;
+
 	tc = { .b = tc.r, .g = tc.g, .r = tc.b, .a = 0 };
 	bc = { .b = bc.r, .g = bc.g, .r = bc.b, .a = bc.a };
+	SetTextColor(hdc, tc);
+	if (bc.a == 0xff) SetBkColor(hdc, bc.c & 0xffffff);
+	SetBkMode(hdc, (bc.a == 0xff) ? OPAQUE : TRANSPARENT);
 
-	if (tc != tc_cur) SetTextColor(hdc, tc_cur = tc);
-	if (bc != bc_cur)
-	{
-		if (bc >> 24 == 0xff) {
-			SetBkColor(hdc, bc & 0xffffff);
-			if (bc_cur >> 24 != 0xff) SetBkMode(hdc, OPAQUE);
-		}
-		else SetBkMode(hdc, TRANSPARENT);
-		bc_cur = bc;
-	}
+	TextOutW(hdc, (int)p.x, (int)p.y, s.data(), (int)s.size());
+}
+
+size2i bitmap::size_text(std::wstring_view s, int h, bool bold, int font_id)
+{
+	if (s.empty()) return {};
+	auto hfont = get_font_from_cache(h, font_id, bold);
+	if (!hfont) return {};
+	SelectObject(hdc, hfont);
+	SIZE a;
+	GetTextExtentPoint32W(hdc, s.data(), (int)s.size(), &a);
+	return { a.cx, a.cy };
 }
