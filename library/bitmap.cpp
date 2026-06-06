@@ -2,6 +2,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+namespace
+{
+std::array<std::wstring, 3> font_names = { L"Arial", L"Times New Roman", L"Courier New" };
+
 struct blend_replace
 {
 	color cc;
@@ -105,6 +109,61 @@ struct blend_over_alpha
 		c.r = (c.r * k0 + cc1.r * k1 + cc2.r * k2) / znam;
 		c.a = 255 - ((kk_ * kk) >> 8);
 	}
+};
+
+struct font_style
+{
+	long h = 10;
+	long id = 0;
+	bool bold = false;
+
+	bool operator==(const font_style& o) const = default;
+};
+
+struct font_hash
+{
+	size_t operator()(const font_style& f) const noexcept
+	{
+		return size_t(f.h) * 64 + size_t(f.id) * 2 + f.bold;
+	}
+};
+
+HFONT get_font_from_cache(i64 h, int id, bool bold)
+{
+	constexpr double ln_font_step = 0.05; // ~ln(1.05);
+	static std::unordered_map<font_style, HFONT, font_hash> fonts;
+
+	if (h < 3 || h > 1000 || id < 0 || id >= font_names.size()) return nullptr;
+
+	font_style fs{.id = id, .bold = bold};
+	fs.h = long(exp(i64(log(h) / ln_font_step) * ln_font_step) + 0.5);
+
+	auto f = fonts.find(fs);
+	if (f != fonts.end()) return f->second;
+
+	LOGFONT font{
+		.lfHeight = -fs.h,				// высота шрифта или символа
+		.lfWidth = 0,					// средняя ширина символов в шрифте
+		.lfEscapement = 0,				// угол, между вектором наклона и осью X устройства
+		.lfOrientation = 0,				// угол, между основной линией каждого символа и осью X устройства
+		.lfWeight = 100,				// толщина шрифта в диапазоне от 0 до 1000
+		.lfItalic = 0,					// курсивный шрифт
+		.lfUnderline = 0,				// подчеркнутый шрифт
+		.lfStrikeOut = 0,				// зачеркнутый шрифт
+		.lfCharSet = DEFAULT_CHARSET,	// набор символов
+		.lfOutPrecision = 0,			// точность вывода
+		.lfClipPrecision = 0,			// точность отсечения
+		.lfQuality = 0,					// качество вывода
+		.lfPitchAndFamily = 0,			// ширина символов и семейство шрифта
+	};
+	memcpy(font.lfFaceName, font_names[fs.id].c_str(), font_names[fs.id].size() * 2 + 2); // название шрифта
+
+	auto hfont = CreateFontIndirect(&font);
+	if (hfont) fonts[fs] = hfont;
+
+	return hfont;
+}
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
