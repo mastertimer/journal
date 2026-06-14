@@ -7,6 +7,15 @@
 struct interval;
 struct rect;
 struct recti;
+struct xy;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline i64 floori(double x)
+{
+	i64 res = (i64)x;
+	return res - (x < 0 && x != res);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -14,6 +23,9 @@ struct ixy // индекс, номер
 {
 	i64 x;
 	i64 y;
+
+	ixy() = default;
+	inline ixy(xy b);
 }; 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +34,14 @@ struct xy
 {
 	double x;
 	double y;
+
+	xy& operator+=(const xy b) { x += b.x; y += b.y; return *this; }
+
+	xy operator*(double b) const { return { x * b, y * b }; }
 };
+
+ixy::ixy(xy b) : x{ floori(b.x) }, y{ floori(b.y) } {};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -90,6 +109,7 @@ struct interval // [...])
 	bool   right_closed = true;
 
 	interval& operator&=(const interval& b);
+	interval& operator|=(const interval& b);
 
 	bool empty() const { return (max < min) || (max == min && !right_closed); }
 
@@ -104,8 +124,12 @@ struct rect
 
 	rect() = default;
 	rect(size2i b) : x{ 0.0, double(b.x), false }, y{ 0.0, double(b.y), false } {}
+	rect(interval x_, interval y_);
 
 	rect& operator&=(const rect& b);
+	rect& operator|=(const rect& b);
+
+	rect operator&(rect b) const { b &= *this; return b; }
 
 	bool empty() const;
 };
@@ -116,4 +140,8 @@ struct transform
 {
 	double scale = 1.0;
 	xy offset = { 0.0, 0.0 };
+
+	rect operator()(const rect& b) const;
+
+	transform& operator*=(const transform& b);
 };

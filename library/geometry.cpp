@@ -71,6 +71,20 @@ interval& interval::operator&=(const interval& b)
 	return *this;
 }
 
+interval& interval::operator|=(const interval& b)
+{
+	if (b.empty()) return *this;
+	if (empty()) return *this = b;
+	if (b.min < min) min = b.min;
+	if (b.max > max)
+	{
+		max = b.max;
+		right_closed = b.right_closed;
+	}
+	else if (b.max == max) right_closed |= b.right_closed;
+	return *this;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool rect::empty() const
@@ -84,3 +98,32 @@ rect& rect::operator&=(const rect& b)
 	y &= b.y;
 	return *this;
 }
+
+rect& rect::operator|=(const rect& b)
+{
+	if (b.empty()) return *this;
+	if (empty()) return *this = b;
+	x |= b.x;
+	y |= b.y;
+	return *this;
+}
+
+rect::rect(interval x_, interval y_) : x{ x_ }, y{ y_ }
+{
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+transform& transform::operator*=(const transform& b)
+{
+	offset += b.offset * scale;
+	scale *= b.scale;
+	return *this;
+}
+rect transform::operator()(const rect& b) const
+{
+	if (b.empty()) return b;
+	return { {b.x.min * scale + offset.x, b.x.max * scale + offset.x},
+			 {b.y.min * scale + offset.y, b.y.max * scale + offset.y} };
+}
+
