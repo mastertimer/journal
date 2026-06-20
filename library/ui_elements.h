@@ -8,17 +8,24 @@ struct ui_scene;
 
 struct ui_element
 {
+	friend ui_scene;
+
 	rect local_rect;
 	transform trans;
-	ui_scene* scene = nullptr;
     ui_element* parent = nullptr;
     std::vector<std::unique_ptr<ui_element>> children;
     std::unique_ptr<bitmap> render_cache;
 
+	ui_element();
+	virtual ~ui_element() {}
+
     void render(transform tr); // нарисовать дерево
 	rect calc_rect(); // вычислить область
 
+	void add_child(std::unique_ptr<ui_element> element);
+
 protected:
+	ui_scene* scene = nullptr;
 	std::optional<rect> full_rect; // local_rect + children.local_rect
 
 	virtual void draw(transform tr);

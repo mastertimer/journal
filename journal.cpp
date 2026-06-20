@@ -4,10 +4,19 @@
 #include <windows.h>
 
 #include "ui_scene.h"
+#include "ui_elements.h"
 
 namespace
 {
-    ui_scene scene;
+
+ui_scene scene;
+
+void init_ui_elements()
+{
+    auto text = std::make_unique<ui_text>();
+    scene.root->add_child(std::move(text));
+}
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

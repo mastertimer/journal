@@ -3,6 +3,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+ui_element::ui_element()
+{
+}
+
 void ui_element::draw(transform tr)
 {
 }
@@ -26,6 +30,15 @@ rect ui_element::calc_rect()
 		*full_rect |= element->trans(*element->full_rect);
 	}
 	return *full_rect;
+}
+
+void ui_element::add_child(std::unique_ptr<ui_element> element)
+{
+	auto el = element.get();
+	children.push_back(std::move(element));
+	el->parent = this;
+	el->scene = scene;
+//	element->add_area();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

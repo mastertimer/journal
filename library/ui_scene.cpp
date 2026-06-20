@@ -12,3 +12,9 @@ recti ui_scene::draw(size2i s)
 	changed_rect = rect();
 	return result;
 }
+
+ui_scene::ui_scene()
+{
+	root = std::make_unique<ui_element>();
+	root->scene = this;
+}

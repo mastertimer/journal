@@ -12,5 +12,6 @@ struct ui_scene
 
 	color background_color = black_color; // цвет фона
 
+	ui_scene();
 	recti draw(size2i s);
 };
