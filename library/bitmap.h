@@ -82,7 +82,7 @@ struct bitmap : public picture
 	~bitmap();
 
 	bool resize(size2i wh) override;
-	void set_drawing_rect(const recti& r);
+	void set_drawing_rect_for_text();
 	void text(ixy p, std::wstring_view s, int h, color tc, color bc = { 0 }, bool bold = false, int font_id = 0);
 	size2i size_text(std::wstring_view s, int h, bool bold = false, int font_id = 0);
 

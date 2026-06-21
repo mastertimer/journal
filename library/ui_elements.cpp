@@ -14,22 +14,10 @@ void ui_element::draw(transform tr)
 void ui_element::render(transform tr)
 {
 	tr *= trans;
-	if ((tr(calc_rect()) & scene->changed_rect).empty()) return;
-	scene->canvas.set_drawing_rect(tr(local_rect) & scene->changed_rect);
+	if ((tr(calc_full_rect()) & scene->changed_rect).empty()) return;
+	scene->canvas.set_drawing_rect(tr(calc_local_rect()) & scene->changed_rect);
 	draw(tr);
 	for (auto& element : children) element->render(tr);
-}
-
-rect ui_element::calc_rect()
-{
-	if (full_rect) return *full_rect;
-	full_rect = local_rect;
-	for (auto& element : children)
-	{
-		element->calc_rect();
-		*full_rect |= element->trans(*element->full_rect);
-	}
-	return *full_rect;
 }
 
 void ui_element::add_child(std::unique_ptr<ui_element> element)
@@ -38,7 +26,7 @@ void ui_element::add_child(std::unique_ptr<ui_element> element)
 	children.push_back(std::move(element));
 	el->parent = this;
 	el->scene = scene;
-	element->add_area();
+	el->add_area();
 }
 
 void ui_element::add_area(std::optional<rect> a)
@@ -57,8 +45,8 @@ void ui_element::add_area(std::optional<rect> a)
 
 rect ui_element::calc_full_rect()
 {
-	if (full_rect) return *full_rect;
-	full_rect = local_rect;
+	if (full_rect.has_value()) return *full_rect;
+	full_rect = calc_local_rect();
 	for (auto& element : children)
 	{
 		element->calc_full_rect();
@@ -67,10 +55,24 @@ rect ui_element::calc_full_rect()
 	return *full_rect;
 }
 
+rect ui_element::calc_local_rect()
+{
+	if (local_rect.has_value()) return *local_rect;
+	local_rect.emplace();
+	return *local_rect;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ui_text::draw(transform tr)
 {
 	int sf = (int)(font_size * tr.scale + 0.5);
 	scene->canvas.text(tr.offset, text, sf, text_color);
+}
+
+rect ui_text::calc_local_rect()
+{
+	if (local_rect.has_value()) return *local_rect;
+	local_rect = scene->canvas.size_text(text, font_size);
+	return *local_rect;
 }

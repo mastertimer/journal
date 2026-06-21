@@ -79,6 +79,8 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
+    init_ui_elements();
+
     MyRegisterClass(hInstance);
 
     HWND hWnd = CreateWindowW(L"JournalWindowClass", L"journal", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);

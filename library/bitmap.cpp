@@ -403,10 +403,8 @@ bitmap& bitmap::operator=(bitmap&& move) noexcept
 	return *this;
 }
 
-void bitmap::set_drawing_rect(const recti& r)
+void bitmap::set_drawing_rect_for_text()
 {
-	picture::set_drawing_rect(r);
-
 	if (drawing_rect == size)
 		SelectClipRgn(hdc, nullptr);
 	else
