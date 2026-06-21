@@ -21,6 +21,8 @@ struct ui_element
 
     void render(transform tr); // нарисовать дерево
 	rect calc_rect(); // вычислить область
+	void add_area(std::optional<rect> a = std::nullopt); // эта область добавлена
+	rect calc_full_rect(); // вычислить полную область
 
 	void add_child(std::unique_ptr<ui_element> element);
 

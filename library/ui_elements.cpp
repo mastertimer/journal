@@ -38,7 +38,33 @@ void ui_element::add_child(std::unique_ptr<ui_element> element)
 	children.push_back(std::move(element));
 	el->parent = this;
 	el->scene = scene;
-//	element->add_area();
+	element->add_area();
+}
+
+void ui_element::add_area(std::optional<rect> a)
+{
+	if (!a)
+		a = calc_full_rect();
+	else
+		if (full_rect.has_value() && !(*a <= *full_rect)) full_rect.reset();
+	if (!parent)
+	{
+		if (scene->root.get() == this) scene->add_changed_rect(trans(*a));
+		return;
+	}
+	parent->add_area(trans(*a));
+}
+
+rect ui_element::calc_full_rect()
+{
+	if (full_rect) return *full_rect;
+	full_rect = local_rect;
+	for (auto& element : children)
+	{
+		element->calc_full_rect();
+		*full_rect |= element->trans(*element->full_rect);
+	}
+	return *full_rect;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

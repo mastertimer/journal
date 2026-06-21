@@ -85,6 +85,15 @@ interval& interval::operator|=(const interval& b)
 	return *this;
 }
 
+bool interval::operator<=(const interval& b) const
+{
+	if (empty()) return true;
+	if (b.empty()) return false;
+	if (min < b.min) return false;
+	if (max == b.max) return (!right_closed) || b.right_closed;
+	return (max <= b.max);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool rect::empty() const
@@ -110,6 +119,13 @@ rect& rect::operator|=(const rect& b)
 
 rect::rect(interval x_, interval y_) : x{ x_ }, y{ y_ }
 {
+}
+
+bool rect::operator<=(const rect& b) const
+{
+	if (empty()) return true;
+	if (b.empty()) return false;
+	return (x <= b.x) && (y <= b.y);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

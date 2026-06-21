@@ -18,3 +18,8 @@ ui_scene::ui_scene()
 	root = std::make_unique<ui_element>();
 	root->scene = this;
 }
+
+void ui_scene::add_changed_rect(rect a)
+{
+	changed_rect |= (a & canvas.get_size());
+}

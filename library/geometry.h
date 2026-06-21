@@ -111,6 +111,8 @@ struct interval // [...])
 	interval& operator&=(const interval& b);
 	interval& operator|=(const interval& b);
 
+	bool operator<=(const interval& b) const;
+
 	bool empty() const { return (max < min) || (max == min && !right_closed); }
 
 };
@@ -130,6 +132,8 @@ struct rect
 	rect& operator|=(const rect& b);
 
 	rect operator&(rect b) const { b &= *this; return b; }
+
+	bool operator<=(const rect& b) const;
 
 	bool empty() const;
 };

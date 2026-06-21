@@ -14,4 +14,5 @@ struct ui_scene
 
 	ui_scene();
 	recti draw(size2i s);
+	void add_changed_rect(rect a);
 };
