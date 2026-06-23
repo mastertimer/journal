@@ -243,23 +243,49 @@ void picture::clear(color c)
 	}
 }
 
-template<class Blender> void picture::vertical_line(i64 x, intervali y, color c)
-{
-	if (c.a == 0) return;
-	if (!drawing_rect.x.test(x)) return;
+void picture::vertical_line(i64 x, intervali y, color c)
+{ 
+	if (c.a == 0 || !drawing_rect.x.test(x)) return;
 	y &= drawing_rect.y;
 	if (y.empty()) return;
+
+	if (c.a == 0xff) vertical_line_impl<blend_replace>(x, y, c);
+	else if (transparent) vertical_line_impl<blend_over_alpha>(x, y, c);
+	else vertical_line_impl<blend_over_opaque>(x, y, c);
+}
+
+void picture::horizontal_line(intervali x, i64 y, color c)
+{
+	if (c.a == 0 || !drawing_rect.y.test(y)) return;
+	x &= drawing_rect.x;
+	if (x.empty()) return;
+
+	if (c.a == 0xff) horizontal_line_impl<blend_replace>(x, y, c);
+	else if (transparent) horizontal_line_impl<blend_over_alpha>(x, y, c);
+	else horizontal_line_impl<blend_over_opaque>(x, y, c);
+}
+
+template<typename Blender> void picture::vertical_line_impl(i64 x, intervali y, color c)
+{
 	if (std::is_same<blend_replace, Blender>::value) transparent |= c.a != 0xff;
 	Blender cmix(c);
 	color* cс_max = &pixel(x, y.max);
 	for (auto cc = &pixel(x, y.min); cc < cс_max; cc += size.x) cmix.blend(*cc);
 }
 
-template<class Blender> void picture::fill_rectangle_impl(recti r, color c)
+template<typename Blender> void picture::horizontal_line_impl(intervali x, i64 y, color c)
+{
+	if (std::is_same<blend_replace, Blender>::value) transparent |= c.a != 0xff;
+	Blender cmix(c);
+	color* cс_max = &pixel(x.max, y);
+	for (auto cc = &pixel(x.min, y); cc < cс_max; cc++) cmix.blend(*cc);
+}
+
+template<typename Blender> void picture::fill_rectangle_impl(recti r, color c)
 {
 	if (r.x.length() == 1)
 	{
-		vertical_line<Blender>(r.x.min, r.y, c);
+		vertical_line_impl<Blender>(r.x.min, r.y, c);
 		return;
 	}
 	Blender cmix(c);
@@ -284,6 +310,17 @@ void picture::fill_rectangle(recti r, color c, bool rep)
 		fill_rectangle_impl<blend_over_alpha>(r, c);
 	else
 		fill_rectangle_impl<blend_over_opaque>(r, c);
+}
+
+void picture::rectangle(recti oo, color c)
+{
+	if (c.a == 0 || (oo & drawing_rect).empty()) return;
+	horizontal_line( oo.x, oo.y.min, c);
+	if (oo.y.length() == 1) return;
+	horizontal_line( oo.x, oo.y.max - 1, c);
+	if (oo.y.length() == 2) return;
+	vertical_line(oo.x.min, {oo.y.min + 1, oo.y.max - 1 }, c);
+	vertical_line(oo.x.max - 1, { oo.y.min + 1, oo.y.max - 1 }, c);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

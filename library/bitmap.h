@@ -48,6 +48,9 @@ struct picture
 
 	void clear(color c = { 0xFF000000 });
 	void fill_rectangle(recti r, color c, bool rep = false);
+	void rectangle(recti oo, color c);
+	void vertical_line(i64 x, intervali y, color c);
+	void horizontal_line(intervali x, i64 y, color c);
 
 protected:
 	color* data = nullptr;
@@ -59,8 +62,9 @@ protected:
 	const color& pixel(const i64 x, const i64 y) const { return data[y * size.x + x]; }
 
 private:
-	template<typename Blender> void vertical_line(i64 x, intervali y, color c);
-	template<class Blender>	void fill_rectangle_impl(recti r, color c);
+	template<typename Blender> void vertical_line_impl(i64 x, intervali y, color c);
+	template<typename Blender> void horizontal_line_impl(intervali x, i64 y, color c);
+	template<typename Blender> void fill_rectangle_impl(recti r, color c);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
