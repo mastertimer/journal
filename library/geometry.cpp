@@ -9,6 +9,16 @@ intervali::intervali(interval b) : min{ (i64)b.min }, max{ (i64)b.max }
 	max += (max == b.max) ? b.right_closed : (b.max > 0);
 }
 
+intervali& intervali::expand(i64 b)
+{
+	if (!empty())
+	{
+		min -= b;
+		max += b;
+	}
+	return *this;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 recti size2i::move(ixy d) const
@@ -54,6 +64,19 @@ bool recti::operator==(const recti& b) const
 {
 	if (b.empty() && empty()) return true;
 	return (x.min == b.x.min) && (y.min == b.y.min) && (x.max == b.x.max) && (y.max == b.y.max);
+}
+
+recti recti::expanded(i64 b) const
+{
+	recti r = *this;
+	return r.expand(b);
+}
+
+recti& recti::expand(i64 b)
+{
+	x.expand(b);
+	y.expand(b);
+	return *this;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

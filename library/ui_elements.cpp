@@ -76,3 +76,17 @@ rect ui_text::calc_local_rect()
 	local_rect = scene->canvas.size_text(text, font_size);
 	return *local_rect;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ui_text_edit::ui_text_edit()
+{
+	local_rect = rect(size2i{ 200, 32 });
+}
+
+void ui_text_edit::draw(transform tr)
+{
+	auto r = recti(tr(*local_rect));
+	scene->canvas.fill_rectangle(r.expanded(-1), black_color);
+	scene->canvas.rectangle(r, white_color);
+}

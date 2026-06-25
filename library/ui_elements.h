@@ -43,9 +43,24 @@ struct ui_text : public ui_element
 
 	void draw(transform tr) override;
 	rect calc_local_rect() override;
+
+private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ui_text_edit;
+struct ui_text_edit : public ui_element
+{
+	ui_text_edit();
+
+	void draw(transform tr) override;
+
+private:
+	std::wstring text;
+	int font_size = 10;
+	int cursor_position = 0; // абсолютное положение курсора
+	int text_offset = 0; // номер первого символа
+	int visible_text_length = 0; // длина куска
+};
+
 struct ui_labeled_text_edit;

@@ -78,6 +78,7 @@ struct intervali // [...)
 	bool empty()  const { return (max <= min); }
 	i64  length() const { return (min < max) ? (max - min) : 0; }
 	bool test(i64 x) const { return (x >= min) && (x < max); }
+	intervali& expand(i64 b);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -98,6 +99,8 @@ struct recti
 
 	bool empty() const;
 	bool test(ixy b) const;
+	recti expanded(i64 b) const; // расширенная область во все стороны на b
+	recti& expand(i64 b);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
