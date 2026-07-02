@@ -15,7 +15,7 @@ struct ui_element
     std::vector<std::unique_ptr<ui_element>> children;
     std::unique_ptr<bitmap> render_cache;
 
-	ui_element();
+	ui_element(ui_scene* scene_);
 	virtual ~ui_element() {}
 
     void render(transform tr); // нарисовать дерево
@@ -46,6 +46,8 @@ enum class text_align
 
 struct ui_text : public ui_element
 {
+	ui_text(ui_scene* scene_);
+
 	void draw(transform tr) override;
 	rect calc_local_region() override;
 
@@ -62,16 +64,19 @@ private:
 
 struct ui_text_edit : public ui_element
 {
-	ui_text_edit();
+	ui_text_edit(ui_scene* scene_);
 
 	void draw(transform tr) override;
 
 private:
 	std::wstring text;
 	int font_size = 10;
-	int cursor_position = 0; // абсолютное положение курсора
-	int text_offset = 0; // номер первого символа
-	int visible_text_length = 0; // длина куска
+	//int cursor_position = 0; // абсолютное положение курсора
+	//int text_offset = 0; // номер первого символа
+	//int visible_text_length = 0; // длина куска
+	int cursor = 0; // абсолютное положение курсора
+	int first = 0; // номер первого символа
+	int len2 = 0; // длина куска
 };
 
 struct ui_labeled_text_edit;

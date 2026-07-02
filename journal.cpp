@@ -13,7 +13,7 @@ ui_scene scene;
 
 void init_ui_elements()
 {
-    auto text = std::make_unique<ui_text>();
+    auto text = std::make_unique<ui_text>(&scene);
     text->set_text( L"Привет" );
     scene.root->add_child(std::move(text));
 }

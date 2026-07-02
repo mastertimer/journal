@@ -15,8 +15,7 @@ recti ui_scene::draw(size2i s)
 
 ui_scene::ui_scene()
 {
-	root = std::make_unique<ui_element>();
-	root->scene = this;
+	root = std::make_unique<ui_element>(this);
 }
 
 void ui_scene::add_changed_rect(rect a)

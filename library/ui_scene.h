@@ -9,6 +9,7 @@ struct ui_scene
 	rect changed_region;
 
 	std::unique_ptr<ui_element> root;
+	ui_element* keyboard_target = nullptr;
 
 	color background_color = black_color; // цвет фона
 
