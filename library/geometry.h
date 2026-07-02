@@ -94,8 +94,8 @@ struct recti
 
 	recti& operator&=(const recti&);
 	recti operator&(const recti&) const;
-	bool operator!=(const recti&) const;
 	bool operator==(const recti&) const;
+	bool operator!=(const recti& b) const { return !(*this == b); }
 
 	bool empty() const;
 	bool test(ixy b) const;
@@ -114,7 +114,9 @@ struct interval // [...])
 	interval& operator&=(const interval& b);
 	interval& operator|=(const interval& b);
 
+	bool operator==(const interval& b) const;
 	bool operator<=(const interval& b) const;
+	bool touches_boundary(const interval& b) const;
 
 	bool empty() const { return (max < min) || (max == min && !right_closed); }
 
@@ -129,14 +131,18 @@ struct rect
 
 	rect() = default;
 	rect(size2i b) : x{ 0.0, double(b.x), false }, y{ 0.0, double(b.y), false } {}
-	rect(interval x_, interval y_);
+	rect(interval x_, interval y_) : x{ x_ }, y{ y_ } {}
 
 	rect& operator&=(const rect& b);
 	rect& operator|=(const rect& b);
 
-	rect operator&(rect b) const { b &= *this; return b; }
+	rect operator&(const rect& b) const { return rect(*this) &= b; }
 
+	bool operator==(const rect& b) const;
 	bool operator<=(const rect& b) const;
+	bool operator!=(const rect& b) const { return !(*this == b); }
+	bool operator<(const rect& b) const { return (*this <= b) && !(*this == b); }
+	bool touches_boundary(const rect& b) const;
 
 	bool empty() const;
 };

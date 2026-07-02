@@ -54,12 +54,6 @@ recti recti::operator&(const recti& b) const
 	return { x & b.x, y & b.y };
 }
 
-bool recti::operator!=(const recti& b) const
-{
-	if (b.empty() && empty()) return false;
-	return (x.min != b.x.min) || (y.min != b.y.min) || (x.max != b.x.max) || (y.max != b.y.max);
-}
-
 bool recti::operator==(const recti& b) const
 {
 	if (b.empty() && empty()) return true;
@@ -108,6 +102,12 @@ interval& interval::operator|=(const interval& b)
 	return *this;
 }
 
+bool interval::operator==(const interval& b) const
+{
+	if (empty() && b.empty()) return true;
+	return (min == b.min) && (max == b.max) && (right_closed == b.right_closed);
+}
+
 bool interval::operator<=(const interval& b) const
 {
 	if (empty()) return true;
@@ -115,6 +115,16 @@ bool interval::operator<=(const interval& b) const
 	if (min < b.min) return false;
 	if (max == b.max) return (!right_closed) || b.right_closed;
 	return (max <= b.max);
+}
+
+bool interval::touches_boundary(const interval& b) const
+{
+	if (empty() || b.empty()) return false;
+
+	return	(min == b.min) ||
+			(min == b.max && b.right_closed) ||
+			(max == b.min && right_closed) ||
+			(max == b.max && right_closed == b.right_closed);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,8 +150,10 @@ rect& rect::operator|=(const rect& b)
 	return *this;
 }
 
-rect::rect(interval x_, interval y_) : x{ x_ }, y{ y_ }
+bool rect::operator==(const rect& b) const
 {
+	if (empty() && b.empty()) return true;
+	return (x == b.x) && (y == b.y);
 }
 
 bool rect::operator<=(const rect& b) const
@@ -149,6 +161,11 @@ bool rect::operator<=(const rect& b) const
 	if (empty()) return true;
 	if (b.empty()) return false;
 	return (x <= b.x) && (y <= b.y);
+}
+
+bool rect::touches_boundary(const rect& b) const
+{
+	return !(*this & b).empty() && (x.touches_boundary(b.x) || y.touches_boundary(b.y));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

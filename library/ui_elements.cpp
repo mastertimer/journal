@@ -26,21 +26,24 @@ void ui_element::add_child(std::unique_ptr<ui_element> element)
 	children.push_back(std::move(element));
 	el->parent = this;
 	el->scene = scene;
-	el->add_area();
+	el->reset_regions();
 }
 
-void ui_element::add_area(std::optional<rect> a)
+void ui_element::reset_regions(std::optional<rect> a, bool check_boundary)
 {
-	if (!a)
-		a = calc_full_rect();
-	else
-		if (full_rect.has_value() && !(*a <= *full_rect)) full_rect.reset();
+	if (!a)	a = calc_full_rect();
+	else if (full_rect.has_value())
+	{
+		bool reset = !(*a <= *full_rect);
+		if (check_boundary)	reset |= a->touches_boundary(*full_rect);
+		if (reset) full_rect.reset();
+	}
 	if (!parent)
 	{
-		if (scene->root.get() == this) scene->add_changed_rect(trans(*a));
+		if (scene && scene->root.get() == this) scene->add_changed_rect(trans(*a));
 		return;
 	}
-	parent->add_area(trans(*a));
+	parent->reset_regions(trans(*a), check_boundary);
 }
 
 rect ui_element::calc_full_rect()
@@ -75,6 +78,15 @@ rect ui_text::calc_local_rect()
 	if (local_rect.has_value()) return *local_rect;
 	local_rect = scene->canvas.size_text(text, font_size);
 	return *local_rect;
+}
+
+void ui_text::set_text(std::wstring_view t)
+{
+	if (text == t) return;
+	reset_regions(std::nullopt, true);
+	local_rect.reset();
+	text = t;
+	reset_regions();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

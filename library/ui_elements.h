@@ -19,7 +19,7 @@ struct ui_element
 	virtual ~ui_element() {}
 
     void render(transform tr); // нарисовать дерево
-	void add_area(std::optional<rect> a = std::nullopt); // эта область добавлена
+	void reset_regions(std::optional<rect> a = std::nullopt, bool check_boundary = false);
 	rect calc_full_rect(); // вычислить полную область
 	virtual rect calc_local_rect(); // вычислить локальную область
 
@@ -35,16 +35,27 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+enum class text_align
+{
+	left,
+	center,
+	right
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct ui_text : public ui_element
 {
-	std::wstring text;
-	int font_size = 10;
-	color text_color = white_color;
-
 	void draw(transform tr) override;
 	rect calc_local_rect() override;
 
+	void set_text( std::wstring_view t );
+
 private:
+	std::wstring text;
+	int font_size = 10;
+	color text_color = white_color;
+	text_align align = text_align::left;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
