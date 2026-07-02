@@ -14,8 +14,8 @@ void ui_element::draw(transform tr)
 void ui_element::render(transform tr)
 {
 	tr *= trans;
-	if ((tr(calc_full_rect()) & scene->changed_rect).empty()) return;
-	scene->canvas.set_drawing_rect(tr(calc_local_rect()) & scene->changed_rect);
+	if ((tr(calc_combined_region()) & scene->changed_region).empty()) return;
+	scene->canvas.set_drawing_rect(tr(calc_local_region()) & scene->changed_region);
 	draw(tr);
 	for (auto& element : children) element->render(tr);
 }
@@ -31,12 +31,12 @@ void ui_element::add_child(std::unique_ptr<ui_element> element)
 
 void ui_element::reset_regions(std::optional<rect> a, bool check_boundary)
 {
-	if (!a)	a = calc_full_rect();
-	else if (full_rect.has_value())
+	if (!a)	a = calc_combined_region();
+	else if (combined_region.has_value())
 	{
-		bool reset = !(*a <= *full_rect);
-		if (check_boundary)	reset |= a->touches_boundary(*full_rect);
-		if (reset) full_rect.reset();
+		bool reset = !(*a <= *combined_region);
+		if (check_boundary)	reset |= a->touches_boundary(*combined_region);
+		if (reset) combined_region.reset();
 	}
 	if (!parent)
 	{
@@ -46,23 +46,23 @@ void ui_element::reset_regions(std::optional<rect> a, bool check_boundary)
 	parent->reset_regions(trans(*a), check_boundary);
 }
 
-rect ui_element::calc_full_rect()
+rect ui_element::calc_combined_region()
 {
-	if (full_rect.has_value()) return *full_rect;
-	full_rect = calc_local_rect();
+	if (combined_region.has_value()) return *combined_region;
+	combined_region = calc_local_region();
 	for (auto& element : children)
 	{
-		element->calc_full_rect();
-		*full_rect |= element->trans(*element->full_rect);
+		element->calc_combined_region();
+		*combined_region |= element->trans(*element->combined_region);
 	}
-	return *full_rect;
+	return *combined_region;
 }
 
-rect ui_element::calc_local_rect()
+rect ui_element::calc_local_region()
 {
-	if (local_rect.has_value()) return *local_rect;
-	local_rect.emplace();
-	return *local_rect;
+	if (local_region.has_value()) return *local_region;
+	local_region.emplace();
+	return *local_region;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,18 +73,18 @@ void ui_text::draw(transform tr)
 	scene->canvas.text(tr.offset, text, sf, text_color);
 }
 
-rect ui_text::calc_local_rect()
+rect ui_text::calc_local_region()
 {
-	if (local_rect.has_value()) return *local_rect;
-	local_rect = scene->canvas.size_text(text, font_size);
-	return *local_rect;
+	if (local_region.has_value()) return *local_region;
+	local_region = scene->canvas.size_text(text, font_size);
+	return *local_region;
 }
 
 void ui_text::set_text(std::wstring_view t)
 {
 	if (text == t) return;
 	reset_regions(std::nullopt, true);
-	local_rect.reset();
+	local_region.reset();
 	text = t;
 	reset_regions();
 }
@@ -93,12 +93,12 @@ void ui_text::set_text(std::wstring_view t)
 
 ui_text_edit::ui_text_edit()
 {
-	local_rect = rect(size2i{ 200, 32 });
+	local_region = rect(size2i{ 200, 32 });
 }
 
 void ui_text_edit::draw(transform tr)
 {
-	auto r = recti(tr(*local_rect));
+	auto r = recti(tr(*local_region));
 	scene->canvas.fill_rectangle(r.expanded(-1), black_color);
 	scene->canvas.rectangle(r, white_color);
 }

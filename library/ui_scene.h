@@ -6,7 +6,7 @@
 struct ui_scene
 {
 	bitmap canvas;
-	rect changed_rect;
+	rect changed_region;
 
 	std::unique_ptr<ui_element> root;
 

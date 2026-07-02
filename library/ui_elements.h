@@ -20,15 +20,15 @@ struct ui_element
 
     void render(transform tr); // нарисовать дерево
 	void reset_regions(std::optional<rect> a = std::nullopt, bool check_boundary = false);
-	rect calc_full_rect(); // вычислить полную область
-	virtual rect calc_local_rect(); // вычислить локальную область
+	rect calc_combined_region(); // вычислить полную область
+	virtual rect calc_local_region(); // вычислить локальную область
 
 	void add_child(std::unique_ptr<ui_element> element);
 
 protected:
 	ui_scene* scene = nullptr;
-	std::optional<rect> local_rect;
-	std::optional<rect> full_rect; // local_rect + children.local_rect
+	std::optional<rect> local_region;
+	std::optional<rect> combined_region; // local_region + children.local_region
 
 	virtual void draw(transform tr);
 };
@@ -47,7 +47,7 @@ enum class text_align
 struct ui_text : public ui_element
 {
 	void draw(transform tr) override;
-	rect calc_local_rect() override;
+	rect calc_local_region() override;
 
 	void set_text( std::wstring_view t );
 
