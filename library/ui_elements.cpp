@@ -25,27 +25,33 @@ void ui_element::add_child(std::unique_ptr<ui_element> element)
 	auto el = element.get();
 	children.push_back(std::move(element));
 	el->parent = this;
-	el->reset_regions();
+	el->update_regions(std::nullopt, region_change::add);
 }
 
-void ui_element::reset_regions(std::optional<rect> a, bool check_boundary)
+void ui_element::update_regions(std::optional<rect> r, region_change change)
 {
-	if (!a)	a = calc_combined_region();
-	else if (combined_region.has_value())
+	if (!r)
 	{
-		bool reset = !(*a <= *combined_region);
-		if (check_boundary)	reset |= a->touches_boundary(*combined_region);
-		if (reset) combined_region.reset();
+		if (change == region_change::modify)
+		{
+			if (!local_region) { update_regions({}, region_change::add); return; }
+			r = local_region;
+		}
+		else
+			r = calc_combined_region();
 	}
+	else if ( combined_region.has_value() && change != region_change::modify &&
+		      (!(*r <= *combined_region) || (change == region_change::remove && r->touches_boundary(*combined_region)) ))
+			combined_region.reset();
 	if (!parent)
 	{
-		if (scene && scene->root.get() == this) scene->add_changed_rect(trans(*a));
+		if (scene && scene->root.get() == this)	scene->add_changed_rect(trans(*r));
 		return;
 	}
-	parent->reset_regions(trans(*a), check_boundary);
+	parent->update_regions(trans(*r), change);
 }
 
-rect ui_element::calc_combined_region()
+rect& ui_element::calc_combined_region()
 {
 	if (combined_region.has_value()) return *combined_region;
 	combined_region = calc_local_region();
@@ -57,7 +63,7 @@ rect ui_element::calc_combined_region()
 	return *combined_region;
 }
 
-rect ui_element::calc_local_region()
+rect& ui_element::calc_local_region()
 {
 	if (local_region.has_value()) return *local_region;
 	local_region.emplace();
@@ -76,7 +82,7 @@ void ui_text::draw(transform tr)
 	scene->canvas.text(tr.offset, text, sf, text_color);
 }
 
-rect ui_text::calc_local_region()
+rect& ui_text::calc_local_region()
 {
 	if (local_region.has_value()) return *local_region;
 	local_region = scene->canvas.size_text(text, font_size);
@@ -86,11 +92,11 @@ rect ui_text::calc_local_region()
 void ui_text::set_text(std::wstring_view t)
 {
 	if (text == t) return;
-	reset_regions(std::nullopt, true);
+	update_regions(std::nullopt, region_change::remove);
 	local_region.reset();
 	combined_region.reset();
 	text = t;
-	reset_regions();
+	update_regions(std::nullopt, region_change::add);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -160,4 +166,11 @@ void ui_text_edit::draw(transform tr)
 		size2i size = scene->canvas.size_text(text.substr(first, (i64)cursor - first).c_str(), sf);
 		scene->canvas.vertical_line( oo.x.min + 4 + size.x, { oo.y.min + 1 , oo.y.min + sf + 1 }, white_color);
 	}
+}
+
+void ui_text_edit::set_text(std::wstring_view t)
+{
+	if (text == t) return;
+	text = t;
+	update_regions(std::nullopt, region_change::modify);
 }

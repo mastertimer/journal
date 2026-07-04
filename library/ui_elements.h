@@ -5,6 +5,12 @@
 struct ui_scene;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+enum class region_change
+{
+	add,
+	remove,
+	modify
+};
 
 struct ui_element
 {
@@ -19,9 +25,9 @@ struct ui_element
 	virtual ~ui_element() {}
 
     void render(transform tr); // нарисовать дерево
-	void reset_regions(std::optional<rect> a = std::nullopt, bool check_boundary = false);
-	rect calc_combined_region(); // вычислить полную область
-	virtual rect calc_local_region(); // вычислить локальную область
+	void update_regions(std::optional<rect> r, region_change change);
+	rect& calc_combined_region(); // вычислить полную область
+	virtual rect& calc_local_region(); // вычислить локальную область
 
 	void add_child(std::unique_ptr<ui_element> element);
 
@@ -49,7 +55,7 @@ struct ui_text : public ui_element
 	ui_text(ui_scene* scene_);
 
 	void draw(transform tr) override;
-	rect calc_local_region() override;
+	rect& calc_local_region() override;
 
 	void set_text( std::wstring_view t );
 
@@ -67,6 +73,8 @@ struct ui_text_edit : public ui_element
 	ui_text_edit(ui_scene* scene_);
 
 	void draw(transform tr) override;
+
+	void set_text(std::wstring_view t);
 
 private:
 	std::wstring text;
