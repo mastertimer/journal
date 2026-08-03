@@ -8,8 +8,8 @@ struct ui_scene
 	bitmap canvas;
 	rect changed_region;
 
-	std::unique_ptr<ui_element> root;
-	ui_element* keyboard_target = nullptr;
+	std::shared_ptr<ui_element> root;
+	std::weak_ptr<ui_element> keyboard_target;
 
 	color background_color = black_color; // цвет фона
 

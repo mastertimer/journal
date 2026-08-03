@@ -18,7 +18,7 @@ struct ui_element
 
 	transform trans;
     ui_element* parent = nullptr;
-    std::vector<std::unique_ptr<ui_element>> children;
+    std::vector<std::shared_ptr<ui_element>> children;
     std::unique_ptr<bitmap> render_cache;
 
 	ui_element(ui_scene* scene_);
@@ -29,7 +29,7 @@ struct ui_element
 	rect& calc_combined_region(); // вычислить полную область
 	virtual rect& calc_local_region(); // вычислить локальную область
 
-	void add_child(std::unique_ptr<ui_element> element);
+	void add_child(std::shared_ptr<ui_element> element);
 
 protected:
 	ui_scene* scene = nullptr;

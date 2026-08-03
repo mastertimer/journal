@@ -20,12 +20,11 @@ void ui_element::render(transform tr)
 	for (auto& element : children) element->render(tr);
 }
 
-void ui_element::add_child(std::unique_ptr<ui_element> element)
+void ui_element::add_child(std::shared_ptr<ui_element> element)
 {
-	auto el = element.get();
-	children.push_back(std::move(element));
-	el->parent = this;
-	el->update_regions(std::nullopt, region_change::add);
+	children.push_back(element);
+	element->parent = this;
+	element->update_regions(std::nullopt, region_change::add);
 }
 
 void ui_element::update_regions(std::optional<rect> r, region_change change)
@@ -161,7 +160,7 @@ void ui_text_edit::draw(transform tr)
 		if (first > 0)        scene->canvas.vertical_line(oo.x.min + 2, oo.y.expand(-1), { 0xFF30C0F0 });
 		if (len2 < l - first) scene->canvas.vertical_line(oo.x.max - 2, oo.y.expand(-1), { 0xFF30C0F0 });
 	}
-	if (scene->keyboard_target == this)
+	if (scene->keyboard_target.lock().get() == this)
 	{
 		size2i size = scene->canvas.size_text(text.substr(first, (i64)cursor - first).c_str(), sf);
 		scene->canvas.vertical_line( oo.x.min + 4 + size.x, { oo.y.min + 1 , oo.y.min + sf + 1 }, white_color);

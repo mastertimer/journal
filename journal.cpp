@@ -13,13 +13,14 @@ ui_scene scene;
 
 void init_ui_elements()
 {
-    auto text = std::make_unique<ui_text>(&scene);
+    auto text = std::make_shared<ui_text>(&scene);
     text->set_text(L"Привет");
-    scene.root->add_child(std::move(text));
-    auto text_edit = std::make_unique<ui_text_edit>(&scene);
+    scene.root->add_child(text);
+    auto text_edit = std::make_shared<ui_text_edit>(&scene);
     text_edit->trans.offset = { 100, 100 };
-    text_edit->set_text(L"ввод текста");
-    scene.root->add_child(std::move(text_edit));
+    text_edit->set_text(L"Ввод Текста");
+    scene.root->add_child(text_edit);
+	scene.keyboard_target = text_edit;
 }
 
 }
