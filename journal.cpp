@@ -18,7 +18,7 @@ void init_ui_elements()
     scene.root->add_child(text);
     auto text_edit = std::make_shared<ui_text_edit>(&scene);
     text_edit->trans.offset = { 100, 100 };
-    text_edit->set_text(L"Ввод Текста");
+    text_edit->set_text(L"Ввоqу1р[ЁЙ Текста");
     scene.root->add_child(text_edit);
 	scene.keyboard_target = text_edit;
 }
@@ -45,6 +45,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+    case WM_CHAR:
+        scene.key_press(wParam);
+        paint(hWnd);
+        return 0;
+    case WM_KEYDOWN:
+        switch (wParam)
+        {
+        default:
+            scene.key_down(wParam);
+            paint(hWnd);
+        }
+        break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;

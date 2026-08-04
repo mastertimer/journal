@@ -22,3 +22,19 @@ void ui_scene::add_changed_rect(rect a)
 {
 	changed_region |= (a & canvas.get_size());
 }
+
+void ui_scene::key_down(u64 key)
+{
+	if (auto target = keyboard_target.lock())
+	{
+		target->key_down(key);
+	}
+}
+
+void ui_scene::key_press(u64 key)
+{
+	if (auto target = keyboard_target.lock())
+	{
+		target->key_press(key);
+	}
+}

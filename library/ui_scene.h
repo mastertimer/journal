@@ -16,4 +16,7 @@ struct ui_scene
 	ui_scene();
 	recti draw(size2i s);
 	void add_changed_rect(rect a);
+
+	void key_down(u64 key);
+	void key_press(u64 key);
 };

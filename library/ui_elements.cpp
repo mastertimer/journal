@@ -173,3 +173,38 @@ void ui_text_edit::set_text(std::wstring_view t)
 	text = t;
 	update_regions(std::nullopt, region_change::modify);
 }
+
+void ui_text_edit::key_down(u64 key)
+{
+	switch (key)
+	{
+	case 8: // backspace
+		if (cursor <= 0) return;
+		text.erase(cursor - 1, 1);
+		cursor--;
+		break;
+	case 37: // left
+		if (cursor <= 0) return;
+		cursor--;
+		break;
+	case 39: // right
+		if (cursor >= text.size()) return;
+		cursor++;
+		break;
+	case 46: // delete
+		if (cursor >= text.size()) return;
+		text.erase(cursor, 1);
+		break;
+	default:
+		return;
+	}
+	update_regions({}, region_change::modify);
+}
+
+void ui_text_edit::key_press(u64 key)
+{
+	if (key < 32) return;
+	text.insert(cursor, 1, wchar_t(key));
+	cursor++;
+	update_regions({}, region_change::modify);
+}

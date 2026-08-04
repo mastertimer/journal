@@ -31,6 +31,9 @@ struct ui_element
 
 	void add_child(std::shared_ptr<ui_element> element);
 
+	virtual void key_down(u64 key) {}
+	virtual void key_press(u64 key) {}
+
 protected:
 	ui_scene* scene = nullptr;
 	std::optional<rect> local_region;
@@ -73,6 +76,8 @@ struct ui_text_edit : public ui_element
 	ui_text_edit(ui_scene* scene_);
 
 	void draw(transform tr) override;
+	void key_down(u64 key) override;
+	void key_press(u64 key) override;
 
 	void set_text(std::wstring_view t);
 
