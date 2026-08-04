@@ -102,7 +102,7 @@ void ui_text::set_text(std::wstring_view t)
 
 ui_text_edit::ui_text_edit(ui_scene* scene_) : ui_element(scene_)
 {
-	local_region = rect(size2i{ 200, 32 });
+	local_region = rect(size2i{ 200, font_size + vertical_indentation * 2 + 2 });
 }
 
 void ui_text_edit::draw(transform tr)
@@ -110,8 +110,9 @@ void ui_text_edit::draw(transform tr)
 	auto oo = recti(tr(*local_region));
 	scene->canvas.fill_rectangle(oo.expanded(-1), black_color);
 	scene->canvas.rectangle(oo, white_color);
-	int sf = (int)(13 * tr.scale + 0.5);
+	int sf = (int)(font_size * tr.scale + 0.5);
 	if (sf < 1) return;
+	int top_indent = (oo.y.length() - sf) / 2;
 	int l = (int)text.size();
 	if (cursor < 0) cursor = 0;
 	if (cursor > l) cursor = l;
@@ -156,14 +157,14 @@ void ui_text_edit::draw(transform tr)
 					first--;
 				}
 		}
-		scene->canvas.text({ oo.x.min + 5, oo.y.min }, text.substr(first, len2).c_str(), sf, white_color, { 0 });
-		if (first > 0)        scene->canvas.vertical_line(oo.x.min + 2, oo.y.expand(-1), { 0xFF30C0F0 });
-		if (len2 < l - first) scene->canvas.vertical_line(oo.x.max - 2, oo.y.expand(-1), { 0xFF30C0F0 });
+		scene->canvas.text({ oo.x.min + 5, oo.y.min + top_indent }, text.substr(first, len2).c_str(), sf, white_color, { 0 });
+		if (first > 0)        scene->canvas.vertical_line(oo.x.min + 2, oo.y.expanded(-1), { 0xFF30C0F0 });
+		if (len2 < l - first) scene->canvas.vertical_line(oo.x.max - 3, oo.y.expanded(-1), { 0xFF30C0F0 });
 	}
 	if (scene->keyboard_target.lock().get() == this)
 	{
 		size2i size = scene->canvas.size_text(text.substr(first, (i64)cursor - first).c_str(), sf);
-		scene->canvas.vertical_line( oo.x.min + 4 + size.x, { oo.y.min + 1 , oo.y.min + sf + 1 }, white_color);
+		scene->canvas.vertical_line( oo.x.min + 4 + size.x, { oo.y.min + top_indent , oo.y.min + sf + top_indent }, white_color);
 	}
 }
 

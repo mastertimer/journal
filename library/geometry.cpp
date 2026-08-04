@@ -19,6 +19,12 @@ intervali& intervali::expand(i64 b)
 	return *this;
 }
 
+intervali intervali::expanded(i64 b) const
+{
+	intervali r = *this;
+	return r.expand(b);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 recti size2i::move(ixy d) const
@@ -179,7 +185,7 @@ transform& transform::operator*=(const transform& b)
 rect transform::operator()(const rect& b) const
 {
 	if (b.empty()) return b;
-	return { {b.x.min * scale + offset.x, b.x.max * scale + offset.x},
-			 {b.y.min * scale + offset.y, b.y.max * scale + offset.y} };
+	return { {b.x.min * scale + offset.x, b.x.max * scale + offset.x, b.x.right_closed},
+			 {b.y.min * scale + offset.y, b.y.max * scale + offset.y, b.y.right_closed} };
 }
 

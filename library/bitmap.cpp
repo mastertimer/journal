@@ -142,7 +142,7 @@ HFONT get_font_from_cache(i64 h, int id, bool bold)
 	if (f != fonts.end()) return f->second;
 
 	LOGFONT font{
-		.lfHeight = -fs.h,							// высота шрифта или символа
+		.lfHeight = fs.h,							// высота шрифта или символа
 		.lfWidth = 0,								// средняя ширина символов в шрифте
 		.lfEscapement = 0,							// угол, между вектором наклона и осью X устройства
 		.lfOrientation = 0,							// угол, между основной линией каждого символа и осью X устройства
@@ -390,10 +390,12 @@ bitmap::bitmap(bitmap&& move) noexcept :picture({0,0}), hdc(move.hdc), hbm(move.
 	size = move.size;
 	transparent = move.transparent;
 	drawing_rect = move.drawing_rect;
+	selected_font = move.selected_font;
 
 	move.hdc = nullptr;
 	move.hbm = nullptr;
 	move.data = nullptr;
+	move.selected_font = nullptr;
 	move.drawing_rect = move.size = { 0,0 };
 }
 
@@ -431,10 +433,12 @@ bitmap& bitmap::operator=(bitmap&& move) noexcept
 	size = move.size;
 	transparent = move.transparent;
 	drawing_rect = move.drawing_rect;
+	selected_font = move.selected_font;
 
 	move.hdc = nullptr;
 	move.hbm = nullptr;
 	move.data = nullptr;
+	move.selected_font = nullptr;
 	move.drawing_rect = move.size = { 0,0 };
 
 	return *this;
@@ -473,7 +477,11 @@ size2i bitmap::size_text(std::wstring_view s, int h, bool bold, int font_id)
 	if (s.empty()) return {};
 	auto hfont = get_font_from_cache(h, font_id, bold);
 	if (!hfont) return {};
-	SelectObject(hdc, hfont);
+	if (selected_font != hfont)
+	{
+		SelectObject(hdc, hfont);
+		selected_font = hfont;
+	}
 	SIZE a;
 	GetTextExtentPoint32W(hdc, s.data(), (int)s.size(), &a);
 	return { a.cx, a.cy };

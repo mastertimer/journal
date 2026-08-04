@@ -91,5 +91,5 @@ struct bitmap : public picture
 	size2i size_text(std::wstring_view s, int h, bool bold = false, int font_id = 0);
 
 private:
-
+	HFONT selected_font = nullptr;
 };

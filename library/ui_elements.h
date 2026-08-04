@@ -2,9 +2,16 @@
 
 #include "bitmap.h"
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+constexpr int default_font_size = 22;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct ui_scene;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 enum class region_change
 {
 	add,
@@ -64,7 +71,7 @@ struct ui_text : public ui_element
 
 private:
 	std::wstring text;
-	int font_size = 10;
+	int font_size = default_font_size;
 	color text_color = white_color;
 	text_align align = text_align::left;
 };
@@ -83,13 +90,15 @@ struct ui_text_edit : public ui_element
 
 private:
 	std::wstring text;
-	int font_size = 10;
+	int font_size = default_font_size;
 	//int cursor_position = 0; // абсолютное положение курсора
 	//int text_offset = 0; // номер первого символа
 	//int visible_text_length = 0; // длина куска
 	int cursor = 0; // абсолютное положение курсора
 	int first = 0; // номер первого символа
 	int len2 = 0; // длина куска
+
+	constexpr static int vertical_indentation = 2;
 };
 
 struct ui_labeled_text_edit;

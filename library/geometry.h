@@ -80,6 +80,7 @@ struct intervali // [...)
 	i64  length() const { return (min < max) ? (max - min) : 0; }
 	bool test(i64 x) const { return (x >= min) && (x < max); }
 	intervali& expand(i64 b);
+	intervali expanded(i64 b) const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
