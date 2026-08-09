@@ -79,6 +79,7 @@ struct intervali // [...)
 	bool empty()  const { return (max <= min); }
 	i64  length() const { return (min < max) ? (max - min) : 0; }
 	bool test(i64 x) const { return (x >= min) && (x < max); }
+	i64 lerp(double t) const { return floori(min + 0.5 + (max - min - 1) * t); }
 	intervali& expand(i64 b);
 	intervali expanded(i64 b) const;
 };

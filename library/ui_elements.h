@@ -51,7 +51,7 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class text_align
+enum class horizontal_align
 {
 	left,
 	center,
@@ -73,7 +73,7 @@ private:
 	std::wstring text;
 	int font_size = default_font_size;
 	color text_color = white_color;
-	text_align align = text_align::left;
+	horizontal_align align = horizontal_align::left;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -91,9 +91,6 @@ struct ui_text_edit : public ui_element
 private:
 	std::wstring text;
 	int font_size = default_font_size;
-	//int cursor_position = 0; // абсолютное положение курсора
-	//int text_offset = 0; // номер первого символа
-	//int visible_text_length = 0; // длина куска
 	int cursor = 0; // абсолютное положение курсора
 	int first = 0; // номер первого символа
 	int len2 = 0; // длина куска
@@ -101,4 +98,16 @@ private:
 	constexpr static int vertical_indentation = 2;
 };
 
-struct ui_labeled_text_edit;
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct ui_value_edit : public ui_element
+{
+	ui_value_edit(ui_scene* scene_);
+
+	void draw(transform tr) override;
+
+private:
+	int font_size = default_font_size;
+
+	constexpr static int vertical_indentation = 2;
+};

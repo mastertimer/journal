@@ -112,7 +112,7 @@ void ui_text_edit::draw(transform tr)
 	scene->canvas.rectangle(oo, white_color);
 	int sf = (int)(font_size * tr.scale + 0.5);
 	if (sf < 1) return;
-	int top_indent = (oo.y.length() - sf) / 2;
+	i64 top_indent = (oo.y.length() - sf) / 2;
 	int l = (int)text.size();
 	if (cursor < 0) cursor = 0;
 	if (cursor > l) cursor = l;
@@ -208,4 +208,19 @@ void ui_text_edit::key_press(u64 key)
 	text.insert(cursor, 1, wchar_t(key));
 	cursor++;
 	update_regions({}, region_change::modify);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ui_value_edit::ui_value_edit(ui_scene* scene_) : ui_element(scene_)
+{
+	local_region = rect(size2i{ 200, font_size * 2 + vertical_indentation * 4 + 3 });
+}
+
+void ui_value_edit::draw(transform tr)
+{
+	auto oo = recti(tr(*local_region));
+	scene->canvas.fill_rectangle(oo.expanded(-1), black_color);
+	scene->canvas.rectangle(oo, white_color);
+	scene->canvas.horizontal_line(oo.x.expanded(-1), oo.y.lerp(0.5), white_color);
 }
