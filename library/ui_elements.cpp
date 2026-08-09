@@ -3,14 +3,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ui_element::ui_element(ui_scene* scene_) : scene{ scene_ }
-{
-}
-
-void ui_element::draw(transform tr)
-{
-}
-
 void ui_element::render(transform tr)
 {
 	tr *= trans;
@@ -24,11 +16,13 @@ void ui_element::add_child(std::shared_ptr<ui_element> element)
 {
 	children.push_back(element);
 	element->parent = this;
+	element->scene = scene;
 	element->update_regions(std::nullopt, region_change::add);
 }
 
 void ui_element::update_regions(std::optional<rect> r, region_change change)
 {
+	if (!scene) return;
 	if (!r)
 	{
 		if (change == region_change::modify)
@@ -71,10 +65,6 @@ rect& ui_element::calc_local_region()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ui_text::ui_text(ui_scene* scene_) : ui_element(scene_)
-{
-}
-
 void ui_text::draw(transform tr)
 {
 	int sf = (int)(font_size * tr.scale + 0.5);
@@ -100,7 +90,7 @@ void ui_text::set_text(std::wstring_view t)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ui_text_edit::ui_text_edit(ui_scene* scene_) : ui_element(scene_)
+ui_text_edit::ui_text_edit()
 {
 	local_region = rect(size2i{ 200, font_size + vertical_indentation * 2 + 2 });
 }
@@ -122,13 +112,13 @@ void ui_text_edit::draw(transform tr)
 	int rx_text = (int)(oo.x.length() - 8);
 	if ((l > 0) && (rx_text > 3))
 	{
-		size2i size = scene->canvas.size_text(text.substr(first, len2).c_str(), sf);
+		size2i size = scene->canvas.size_text(text.substr(first, len2), sf);
 		if (size.x > rx_text)
 		{
 			while (first + len2 > cursor)
 			{
 				len2--;
-				size = scene->canvas.size_text(text.substr(first, len2).c_str(), sf);
+				size = scene->canvas.size_text(text.substr(first, len2), sf);
 				if (size.x <= rx_text) break;
 			}
 			if (size.x > rx_text)
@@ -136,7 +126,7 @@ void ui_text_edit::draw(transform tr)
 				{
 					len2--;
 					first++;
-					size = scene->canvas.size_text(text.substr(first, len2).c_str(), sf);
+					size = scene->canvas.size_text(text.substr(first, len2), sf);
 					if (size.x <= rx_text) break;
 				}
 		}
@@ -144,26 +134,26 @@ void ui_text_edit::draw(transform tr)
 		{
 			while (first + len2 < l)
 			{
-				size = scene->canvas.size_text(text.substr(first, len2 + 1LL).c_str(), sf);
+				size = scene->canvas.size_text(text.substr(first, len2 + 1LL), sf);
 				if (size.x > rx_text) break;
 				len2++;
 			}
 			if (size.x < rx_text)
 				while (first > 0)
 				{
-					size = scene->canvas.size_text(text.substr(first - 1LL, len2 + 1LL).c_str(), sf);
+					size = scene->canvas.size_text(text.substr(first - 1LL, len2 + 1LL), sf);
 					if (size.x > rx_text) break;
 					len2++;
 					first--;
 				}
 		}
-		scene->canvas.text({ oo.x.min + 5, oo.y.min + top_indent }, text.substr(first, len2).c_str(), sf, white_color, { 0 });
+		scene->canvas.text({ oo.x.min + 5, oo.y.min + top_indent }, text.substr(first, len2), sf, white_color, { 0 });
 		if (first > 0)        scene->canvas.vertical_line(oo.x.min + 2, oo.y.expanded(-1), { 0xFF30C0F0 });
 		if (len2 < l - first) scene->canvas.vertical_line(oo.x.max - 3, oo.y.expanded(-1), { 0xFF30C0F0 });
 	}
 	if (scene->keyboard_target.lock().get() == this)
 	{
-		size2i size = scene->canvas.size_text(text.substr(first, (i64)cursor - first).c_str(), sf);
+		size2i size = scene->canvas.size_text(text.substr(first, (i64)cursor - first), sf);
 		scene->canvas.vertical_line( oo.x.min + 4 + size.x, { oo.y.min + top_indent , oo.y.min + sf + top_indent }, white_color);
 	}
 }
@@ -212,7 +202,32 @@ void ui_text_edit::key_press(u64 key)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ui_value_edit::ui_value_edit(ui_scene* scene_) : ui_element(scene_)
+ui_button::ui_button() : ui_element()
+{
+	local_region = rect(size2i{ 200, font_size + vertical_indentation * 2 + 2 });
+}
+
+void ui_button::draw(transform tr)
+{
+	auto oo = recti(tr(*local_region));
+	scene->canvas.fill_rectangle(oo.expanded(-1), black_color);
+	scene->canvas.rectangle(oo, white_color);
+	int sf = (int)(font_size * tr.scale + 0.5);
+	auto size = scene->canvas.size_text(caption, font_size);
+
+	scene->canvas.text(oo.center() - size.center(), caption, sf, white_color, { 0 });
+}
+
+void ui_button::set_caption(std::wstring_view t)
+{
+	if (caption == t) return;
+	caption = t;
+	update_regions(std::nullopt, region_change::modify);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ui_value_edit::ui_value_edit() : ui_element()
 {
 	local_region = rect(size2i{ 200, font_size * 2 + vertical_indentation * 4 + 3 });
 }
@@ -222,5 +237,5 @@ void ui_value_edit::draw(transform tr)
 	auto oo = recti(tr(*local_region));
 	scene->canvas.fill_rectangle(oo.expanded(-1), black_color);
 	scene->canvas.rectangle(oo, white_color);
-	scene->canvas.horizontal_line(oo.x.expanded(-1), oo.y.lerp(0.5), white_color);
+	scene->canvas.horizontal_line(oo.x.expanded(-1), floori(oo.y.center()), white_color);
 }

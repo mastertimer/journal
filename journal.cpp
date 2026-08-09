@@ -13,18 +13,22 @@ ui_scene scene;
 
 void init_ui_elements()
 {
-    auto text = std::make_shared<ui_text>(&scene);
+    auto text = std::make_shared<ui_text>();
     text->set_text(L"Привет");
     text->trans.offset = { 100, 50 };
     scene.root->add_child(text);
-    auto text_edit = std::make_shared<ui_text_edit>(&scene);
+    auto text_edit = std::make_shared<ui_text_edit>();
     text_edit->trans.offset = { 100, 100 };
     text_edit->set_text(L"Ввод Текста");
     scene.root->add_child(text_edit);
 	scene.keyboard_target = text_edit;
-    auto value_edit = std::make_shared<ui_value_edit>(&scene);
+    auto value_edit = std::make_shared<ui_value_edit>();
     value_edit->trans.offset = { 100, 150 };
     scene.root->add_child(value_edit);
+    auto button = std::make_shared<ui_button>();
+    button->trans.offset = { 100, 250 };
+    button->set_caption(L"Кнопка");
+    scene.root->add_child(button);
 }
 
 }

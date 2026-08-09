@@ -15,7 +15,8 @@ recti ui_scene::draw(size2i s)
 
 ui_scene::ui_scene()
 {
-	root = std::make_shared<ui_element>(this);
+	root = std::make_shared<ui_element>();
+	root->scene = this;
 }
 
 void ui_scene::add_changed_rect(rect a)

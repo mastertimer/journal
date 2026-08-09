@@ -39,6 +39,7 @@ struct xy
 	xy& operator+=(const xy b) { x += b.x; y += b.y; return *this; }
 
 	xy operator*(double b) const { return { x * b, y * b }; }
+	xy operator-(const xy b) const { return { x - b.x, y - b.y }; }
 };
 
 ixy::ixy(xy b) : x{ floori(b.x) }, y{ floori(b.y) } {};
@@ -55,6 +56,7 @@ struct size2i // [0...x), [0...y)
 	i64  count() const { return empty() ? 0 : x * y; }
 	bool operator==(const size2i s) const { return ((x == s.x) && (y == s.y)) || (empty() && s.empty()); }
 	recti move(ixy d) const;
+	xy center() const { return { x * 0.5, y * 0.5 }; }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +81,8 @@ struct intervali // [...)
 	bool empty()  const { return (max <= min); }
 	i64  length() const { return (min < max) ? (max - min) : 0; }
 	bool test(i64 x) const { return (x >= min) && (x < max); }
-	i64 lerp(double t) const { return floori(min + 0.5 + (max - min - 1) * t); }
+	double lerp(double t) const { return min + 0.5 + (max - min - 1) * t; }
+	double center() const { return min + (max - min) * 0.5; }
 	intervali& expand(i64 b);
 	intervali expanded(i64 b) const;
 };
@@ -104,6 +107,7 @@ struct recti
 	bool test(ixy b) const;
 	recti expanded(i64 b) const; // расширенная область во все стороны на b
 	recti& expand(i64 b);
+	xy center() const { return { x.center(), y.center() }; }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

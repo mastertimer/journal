@@ -21,14 +21,12 @@ enum class region_change
 
 struct ui_element
 {
-	friend ui_scene;
-
 	transform trans;
     ui_element* parent = nullptr;
     std::vector<std::shared_ptr<ui_element>> children;
     std::unique_ptr<bitmap> render_cache;
+	ui_scene* scene = nullptr;
 
-	ui_element(ui_scene* scene_);
 	virtual ~ui_element() {}
 
     void render(transform tr); // нарисовать дерево
@@ -42,11 +40,10 @@ struct ui_element
 	virtual void key_press(u64 key) {}
 
 protected:
-	ui_scene* scene = nullptr;
 	std::optional<rect> local_region;
 	std::optional<rect> combined_region; // local_region + children.local_region
 
-	virtual void draw(transform tr);
+	virtual void draw(transform tr) {}
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,8 +59,6 @@ enum class horizontal_align
 
 struct ui_text : public ui_element
 {
-	ui_text(ui_scene* scene_);
-
 	void draw(transform tr) override;
 	rect& calc_local_region() override;
 
@@ -80,7 +75,7 @@ private:
 
 struct ui_text_edit : public ui_element
 {
-	ui_text_edit(ui_scene* scene_);
+	ui_text_edit();
 
 	void draw(transform tr) override;
 	void key_down(u64 key) override;
@@ -89,25 +84,38 @@ struct ui_text_edit : public ui_element
 	void set_text(std::wstring_view t);
 
 private:
+	constexpr static int vertical_indentation = 2;
 	std::wstring text;
 	int font_size = default_font_size;
 	int cursor = 0; // абсолютное положение курсора
 	int first = 0; // номер первого символа
 	int len2 = 0; // длина куска
+};
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct ui_button : public ui_element
+{
+	ui_button();
+
+	void draw(transform tr) override;
+	void set_caption(std::wstring_view c);
+
+private:
 	constexpr static int vertical_indentation = 2;
+	std::wstring caption;
+	int font_size = default_font_size;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct ui_value_edit : public ui_element
 {
-	ui_value_edit(ui_scene* scene_);
+	ui_value_edit();
 
 	void draw(transform tr) override;
 
 private:
-	int font_size = default_font_size;
-
 	constexpr static int vertical_indentation = 2;
+	int font_size = default_font_size;
 };
