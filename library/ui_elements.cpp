@@ -63,6 +63,14 @@ rect& ui_element::calc_local_region()
 	return *local_region;
 }
 
+bool ui_element::mouse_move(xy mouse_pos)
+{
+	mouse_pos = trans.inverse()(mouse_pos);
+	if (!calc_combined_region().test(mouse_pos)) return false;
+	for (auto& element : children) if (element->mouse_move(mouse_pos)) return true;
+	return local_region->test(mouse_pos) && mouse_move2(mouse_pos);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ui_text::draw(transform tr)

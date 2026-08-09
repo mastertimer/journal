@@ -38,6 +38,8 @@ struct ui_element
 
 	virtual void key_down(u64 key) {}
 	virtual void key_press(u64 key) {}
+	bool mouse_move(xy mouse_pos); // перемещение мышки
+	virtual bool mouse_move2(xy r) { return true;  } // перемещение мышки действие
 
 protected:
 	std::optional<rect> local_region;

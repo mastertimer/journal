@@ -39,3 +39,8 @@ void ui_scene::key_press(u64 key)
 		target->key_press(key);
 	}
 }
+
+void ui_scene::mouse_move(short x, short y)
+{
+	root->mouse_move({ double(x), double(y) });
+}

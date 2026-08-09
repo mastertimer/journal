@@ -19,4 +19,5 @@ struct ui_scene
 
 	void key_down(u64 key);
 	void key_press(u64 key);
+	void mouse_move(short x, short y);
 };

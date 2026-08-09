@@ -36,10 +36,17 @@ struct xy
 	double x;
 	double y;
 
+	xy() = default;
+	xy(double x_, double y_) : x{ x_ }, y{ y_ } {}
+	xy(const ixy b) : x{ double(b.x) }, y{ double(b.y) } {}
+
+	xy operator-() const { return { -x,  -y }; }
+
 	xy& operator+=(const xy b) { x += b.x; y += b.y; return *this; }
 
 	xy operator*(double b) const { return { x * b, y * b }; }
 	xy operator-(const xy b) const { return { x - b.x, y - b.y }; }
+	xy operator+(const xy b) const { return { x + b.x, y + b.y }; }
 };
 
 ixy::ixy(xy b) : x{ floori(b.x) }, y{ floori(b.y) } {};
@@ -126,6 +133,7 @@ struct interval // [...])
 	bool touches_boundary(const interval& b) const;
 
 	bool empty() const { return (max < min) || (max == min && !right_closed); }
+	bool test(double b) const; // принадлежит ли точка области
 
 };
 
@@ -152,6 +160,7 @@ struct rect
 	bool touches_boundary(const rect& b) const;
 
 	bool empty() const;
+	bool test(xy b) const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -162,6 +171,9 @@ struct transform
 	xy offset = { 0.0, 0.0 };
 
 	rect operator()(const rect& b) const;
+	xy operator()(const xy b) const;
 
 	transform& operator*=(const transform& b);
+
+	transform inverse() const;
 };

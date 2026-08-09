@@ -51,6 +51,7 @@ void paint(HWND hwnd, bool all = false)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    static bool tracking_mouse = false;
     switch (message)
     {
     case WM_CHAR:
@@ -65,6 +66,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             scene.key_down(wParam);
             paint(hWnd);
         }
+        break;
+    case WM_MOUSELEAVE:
+        tracking_mouse = false;
+        break;
+    case WM_MOUSEMOVE:
+        if (!tracking_mouse)
+        {
+            tracking_mouse = true;
+            TRACKMOUSEEVENT a{};
+            a.cbSize = sizeof(a);
+            a.dwFlags = TME_LEAVE;
+            a.hwndTrack = hWnd;
+            TrackMouseEvent(&a);
+        }
+        scene.mouse_move((short)LOWORD(lParam), (short)HIWORD(lParam));
+        paint(hWnd);
         break;
     case WM_PAINT:
         {

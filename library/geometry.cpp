@@ -133,6 +133,11 @@ bool interval::touches_boundary(const interval& b) const
 			(max == b.max && right_closed == b.right_closed);
 }
 
+bool interval::test(double b) const
+{
+	return b >= min && (b < max || (b == max && right_closed));
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool rect::empty() const
@@ -174,6 +179,11 @@ bool rect::touches_boundary(const rect& b) const
 	return !(*this & b).empty() && (x.touches_boundary(b.x) || y.touches_boundary(b.y));
 }
 
+bool rect::test(xy b) const
+{
+	return x.test(b.x) && y.test(b.y);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 transform& transform::operator*=(const transform& b)
@@ -187,5 +197,16 @@ rect transform::operator()(const rect& b) const
 	if (b.empty()) return b;
 	return { {b.x.min * scale + offset.x, b.x.max * scale + offset.x, b.x.right_closed},
 			 {b.y.min * scale + offset.y, b.y.max * scale + offset.y, b.y.right_closed} };
+}
+
+transform transform::inverse() const
+{
+	double mm = 1.0 / scale;
+	return { mm, -offset * mm };
+}
+
+xy transform::operator()(const xy b) const
+{
+	return b * scale + offset;
 }
 
