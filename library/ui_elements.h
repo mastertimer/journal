@@ -90,7 +90,7 @@ private:
 	std::wstring text;
 	int font_size = default_font_size;
 	int cursor = 0; // абсолютное положение курсора
-	int first = 0; // номер первого символа
+	int first = 0; // номер первого отображаемого символа
 	int len2 = 0; // длина куска
 };
 
@@ -111,13 +111,17 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ui_value_edit : public ui_element
+struct ui_list : public ui_element
 {
-	ui_value_edit();
+	ui_list();
 
 	void draw(transform tr) override;
 
 private:
+	std::vector<std::wstring> items;
 	constexpr static int vertical_indentation = 2;
 	int font_size = default_font_size;
+	std::optional<int> selected_item;
+	int first_item = 0; // номер первого отображаемого элемента
+	int visible_items_count; // количество отображаемых элементов
 };

@@ -235,15 +235,39 @@ void ui_button::set_caption(std::wstring_view t)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ui_value_edit::ui_value_edit() : ui_element()
+ui_list::ui_list() : ui_element()
 {
-	local_region = rect(size2i{ 200, font_size * 2 + vertical_indentation * 4 + 3 });
+	local_region = rect(size2i{ 200, (font_size + vertical_indentation * 2) * 5 + 2 }); // 5 строк
+
+	items.push_back(L"Элемент 1");
+	items.push_back(L"Элемент 2");
+	items.push_back(L"Элемент 3");
+	items.push_back(L"Элемент 4");
+	items.push_back(L"Элемент 5");
+	items.push_back(L"Элемент 6");
 }
 
-void ui_value_edit::draw(transform tr)
+void ui_list::draw(transform tr)
 {
 	auto oo = recti(tr(*local_region));
 	scene->canvas.fill_rectangle(oo.expanded(-1), black_color);
 	scene->canvas.rectangle(oo, white_color);
-	scene->canvas.horizontal_line(oo.x.expanded(-1), floori(oo.y.center()), white_color);
+	if (items.empty()) return;
+
+	int sf = (int)(font_size * tr.scale + 0.5);
+	if (sf < 1) return;
+
+	visible_items_count = (int)((oo.y.length() - 2) / (sf + vertical_indentation * 2));
+	if (visible_items_count < 1) return;
+
+	if (selected_item)
+	{
+		if (*selected_item < 0) *selected_item = 0;
+		if (*selected_item >= items.size()) *selected_item = (int)items.size() - 1;
+		if (first_item > *selected_item) first_item = *selected_item;
+		if (first_item + visible_items_count <= *selected_item) first_item = *selected_item - visible_items_count + 1;
+	}
+	if (first_item + visible_items_count > (int)items.size()) first_item = (int)items.size() - visible_items_count;
+	if (first_item < 0) first_item = 0;
+
 }
