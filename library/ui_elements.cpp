@@ -1,4 +1,4 @@
-#include "ui_elements.h"
+﻿#include "ui_elements.h"
 #include "ui_scene.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -242,7 +242,7 @@ ui_list::ui_list() : ui_element()
 	items.push_back(L"Элемент 1");
 	items.push_back(L"Элемент 2");
 	items.push_back(L"Элемент 3");
-	items.push_back(L"Элемент 4");
+	items.push_back(L"Элемент 4 В лесу родилась елечка");
 	items.push_back(L"Элемент 5");
 	items.push_back(L"Элемент 6");
 }
@@ -254,10 +254,11 @@ void ui_list::draw(transform tr)
 	scene->canvas.rectangle(oo, white_color);
 	if (items.empty()) return;
 
-	int sf = (int)(font_size * tr.scale + 0.5);
-	if (sf < 1) return;
-
-	visible_items_count = (int)((oo.y.length() - 2) / (sf + vertical_indentation * 2));
+	int fs = (int)(font_size * tr.scale + 0.5);
+	if (fs < 1) return;
+	element_height = fs + vertical_indentation * 2;
+	
+	visible_items_count = (int)((oo.y.length() - 2) / element_height);
 	if (visible_items_count < 1) return;
 
 	if (selected_item)
@@ -269,5 +270,20 @@ void ui_list::draw(transform tr)
 	}
 	if (first_item + visible_items_count > (int)items.size()) first_item = (int)items.size() - visible_items_count;
 	if (first_item < 0) first_item = 0;
+	scroll_bar = (items.size() > visible_items_count);
+	if (scroll_bar)
+	{
+		scroll_bar_width = fs;
+		scene->canvas.vertical_line(oo.x.max - scroll_bar_width - 3, oo.y, white_color);
+		auto oo2 = oo;
+		oo2.x.max -= scroll_bar_width + 3;
+		scene->canvas.set_gdi_clip(oo2);
+	}
 
+	for (int i = first_item; i < items.size() && i < first_item + visible_items_count; i++)
+	{
+		scene->canvas.text(oo.top_left() + ixy(2, element_height * i + 1), items[i], fs, red_color, {0});
+	}
+
+	scene->canvas.set_gdi_clip();
 }

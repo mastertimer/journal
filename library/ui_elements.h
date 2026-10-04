@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "bitmap.h"
 
@@ -122,6 +122,9 @@ private:
 	constexpr static int vertical_indentation = 2;
 	int font_size = default_font_size;
 	std::optional<int> selected_item;
+	int visible_items_count = 0;
+	int element_height = 0;
 	int first_item = 0; // номер первого отображаемого элемента
-	int visible_items_count; // количество отображаемых элементов
+	bool scroll_bar = false;
+	int scroll_bar_width = 8;
 };

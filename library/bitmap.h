@@ -30,7 +30,7 @@ static_assert(sizeof(color) == 4);
 
 constexpr color black_color = { 0xFF000000 };
 constexpr color white_color = { 0xFFFFFFFF };
-
+constexpr color red_color   = { 0xFFFF0000 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct picture
@@ -44,7 +44,8 @@ struct picture
 
 	const size2i& get_size() const { return size; }
 	virtual bool resize(size2i wh);
-	void set_drawing_rect(const recti& q);
+	virtual void set_drawing_rect(const recti& q);
+	const recti& get_drawing_rect() const;
 
 	void clear(color c = { 0xFF000000 });
 	void fill_rectangle(recti r, color c, bool rep = false);
@@ -86,7 +87,9 @@ struct bitmap : public picture
 	~bitmap();
 
 	bool resize(size2i wh) override;
-	void set_drawing_rect_for_text();
+	void set_drawing_rect(const recti& q) override;
+	void set_gdi_clip(recti rect_gdi);
+	void set_gdi_clip();
 	void text(ixy p, std::wstring_view s, int h, color tc, color bc = { 0 }, bool bold = false, int font_id = 0);
 	size2i size_text(std::wstring_view s, int h, bool bold = false, int font_id = 0);
 

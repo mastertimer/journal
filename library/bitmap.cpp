@@ -232,6 +232,11 @@ void picture::set_drawing_rect(const recti& q)
 	drawing_rect = q & size;
 }
 
+const recti& picture::get_drawing_rect() const
+{
+	return drawing_rect;
+}
+
 void picture::clear(color c)
 {
 	if (drawing_rect != size)
@@ -382,6 +387,7 @@ bitmap::bitmap(const bitmap& copy) : picture({0,0})
 	set_drawing_rect(copy.drawing_rect);
 
 	memcpy(data, copy.data, size.count() * sizeof(color));
+	set_gdi_clip();
 }
 
 bitmap::bitmap(bitmap&& move) noexcept :picture({0,0}), hdc(move.hdc), hbm(move.hbm)
@@ -391,6 +397,7 @@ bitmap::bitmap(bitmap&& move) noexcept :picture({0,0}), hdc(move.hdc), hbm(move.
 	transparent = move.transparent;
 	drawing_rect = move.drawing_rect;
 	selected_font = move.selected_font;
+	set_gdi_clip();
 
 	move.hdc = nullptr;
 	move.hbm = nullptr;
@@ -415,6 +422,7 @@ bitmap& bitmap::operator=(const bitmap& copy)
 	set_drawing_rect(copy.drawing_rect);
 
 	if (data && copy.data && size == copy.size) memcpy(data, copy.data, size.count() * sizeof(color));
+	set_gdi_clip();
 
 	return *this;
 }
@@ -434,6 +442,7 @@ bitmap& bitmap::operator=(bitmap&& move) noexcept
 	transparent = move.transparent;
 	drawing_rect = move.drawing_rect;
 	selected_font = move.selected_font;
+	set_gdi_clip();
 
 	move.hdc = nullptr;
 	move.hbm = nullptr;
@@ -444,17 +453,23 @@ bitmap& bitmap::operator=(bitmap&& move) noexcept
 	return *this;
 }
 
-void bitmap::set_drawing_rect_for_text()
+void bitmap::set_gdi_clip(recti rect_gdi)
 {
-	if (drawing_rect == size)
+	rect_gdi &= drawing_rect;
+	if (rect_gdi == size)
 		SelectClipRgn(hdc, nullptr);
 	else
 	{
-		HRGN rgn = CreateRectRgn((int)drawing_rect.x.min, (int)drawing_rect.y.min,
-	                             (int)drawing_rect.x.max, (int)drawing_rect.y.max);
+		HRGN rgn = CreateRectRgn((int)rect_gdi.x.min, (int)rect_gdi.y.min,
+	                             (int)rect_gdi.x.max, (int)rect_gdi.y.max);
 		SelectClipRgn(hdc, rgn);
 		DeleteObject(rgn);
 	}
+}
+
+void bitmap::set_gdi_clip()
+{
+	set_gdi_clip(drawing_rect);
 }
 
 void bitmap::text(ixy p, std::wstring_view s, int h, color tc, color bc, bool bold, int font_id)
@@ -485,4 +500,10 @@ size2i bitmap::size_text(std::wstring_view s, int h, bool bold, int font_id)
 	SIZE a;
 	GetTextExtentPoint32W(hdc, s.data(), (int)s.size(), &a);
 	return { a.cx, a.cy };
+}
+
+void bitmap::set_drawing_rect(const recti& q)
+{
+	picture::set_drawing_rect(q);
+	set_gdi_clip();
 }

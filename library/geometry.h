@@ -27,7 +27,9 @@ struct ixy // индекс, номер
 	ixy() = default;
 	inline ixy(xy b);
 	ixy(i64 x_, i64 y_) : x{ x_ }, y{ y_ } {}
-}; 
+
+	ixy operator+(const ixy b) const { return { x + b.x, y + b.y }; }
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -114,7 +116,12 @@ struct recti
 	bool test(ixy b) const;
 	recti expanded(i64 b) const; // расширенная область во все стороны на b
 	recti& expand(i64 b);
+
 	xy center() const { return { x.center(), y.center() }; }
+	ixy top_left() const { return { x.min, y.min }; } // верхний левый угол
+	ixy top_right() const { return { x.max - 1, y.min }; } // верхний правый угол
+	ixy bottom_left() const { return { x.min, y.max - 1 }; } // нижний левый угол
+	ixy bottom_right() const { return { x.max - 1, y.max - 1 }; } // нижний правый угол
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
