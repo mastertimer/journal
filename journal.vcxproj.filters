@@ -24,6 +24,9 @@
     <ClCompile Include="journal.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="library\ui_layout.cpp">
+      <Filter>Исходные файлы\library</Filter>
+    </ClCompile>
     <ClCompile Include="library\bitmap.cpp">
       <Filter>Исходные файлы\library</Filter>
     </ClCompile>
@@ -64,6 +67,9 @@
       <Filter>Файлы заголовков\library</Filter>
     </ClInclude>
     <ClInclude Include="library\ui_scene.h">
+      <Filter>Файлы заголовков\library</Filter>
+    </ClInclude>
+    <ClInclude Include="library\ui_layout.h">
       <Filter>Файлы заголовков\library</Filter>
     </ClInclude>
     <ClInclude Include="library\ui_elements.h">

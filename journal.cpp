@@ -4,35 +4,12 @@
 #include <windows.h>
 
 #include "ui_scene.h"
-#include "ui_elements.h"
+#include "ui_layout.h"
 
 namespace
 {
 
 ui_scene scene;
-
-void init_ui_elements()
-{
-    auto text = std::make_shared<ui_text>();
-    text->set_text(L"Привет");
-    text->trans.offset = { 100, 50 };
-    scene.root->add_child(text);
-
-    auto text_edit = std::make_shared<ui_text_edit>();
-    text_edit->trans.offset = { 100, 100 };
-    text_edit->set_text(L"Ввод Текста");
-    scene.root->add_child(text_edit);
-	scene.keyboard_target = text_edit;
-
-    auto list = std::make_shared<ui_list>();
-    list->trans.offset = { 100, 150 };
-    scene.root->add_child(list);
-
-    auto button = std::make_shared<ui_button>();
-    button->trans.offset = { 100, 350 };
-    button->set_caption(L"Кнопка");
-    scene.root->add_child(button);
-}
 
 }
 
@@ -125,7 +102,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
-    init_ui_elements();
+    initialize_ui_scene(scene);
 
     MyRegisterClass(hInstance);
 
