@@ -93,8 +93,10 @@ private:
 	std::wstring text;
 	int font_size = default_font_size;
 	int cursor = 0; // абсолютное положение курсора
-	int first = 0; // номер первого отображаемого символа
-	int len2 = 0; // длина куска
+	int visible_text_begin = 0; // индекс первого отображаемого символа
+	int visible_text_end = 0; // индекс после последнего отображаемого символа
+
+	void update_visible_text(int scaled_font_size, int available_width);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
