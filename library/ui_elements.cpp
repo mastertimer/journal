@@ -288,47 +288,73 @@ ui_list::ui_list() : ui_element()
 
 void ui_list::draw(transform tr)
 {
-	auto oo = recti(tr(*local_region));
-	scene->canvas.fill_rectangle(oo.expanded(-1), black_color);
-	scene->canvas.rectangle(oo, white_color);
-	if (items.empty()) return;
+	auto bounds = recti(tr(*local_region));
+	draw_frame(bounds);
 
-	int fs = (int)(font_size * tr.scale + 0.5);
-	if (fs < 1) return;
-	element_height = fs + vertical_indentation * 2;
-	
-	visible_items_count = (int)((oo.y.length() - 2) / element_height);
-	if (visible_items_count < 1) return;
+	int scaled_font_size = (int)(font_size * tr.scale + 0.5);
+	if (!prepare_layout(bounds, scaled_font_size)) return;
 
+	draw_scroll_bar(bounds, scaled_font_size);
+	draw_items(bounds, scaled_font_size);
+}
+
+void ui_list::draw_frame(recti bounds)
+{
+	scene->canvas.fill_rectangle(bounds.expanded(-1), black_color);
+	scene->canvas.rectangle(bounds, white_color);
+}
+
+bool ui_list::prepare_layout(recti bounds, int scaled_font_size)
+{
+	if (items.empty() || scaled_font_size < 1) return false;
+
+	element_height = scaled_font_size + vertical_indentation * 2;
+	visible_items_count = (int)((bounds.y.length() - 2) / element_height);
+	if (visible_items_count < 1) return false;
+
+	int item_count = (int)items.size();
 	if (selected_item)
 	{
-		if (*selected_item < 0) *selected_item = 0;
-		if (*selected_item >= items.size()) *selected_item = (int)items.size() - 1;
+		*selected_item = std::clamp(*selected_item, 0, item_count - 1);
 		if (first_item > *selected_item) first_item = *selected_item;
-		if (first_item + visible_items_count <= *selected_item) first_item = *selected_item - visible_items_count + 1;
+		if (first_item + visible_items_count <= *selected_item)
+			first_item = *selected_item - visible_items_count + 1;
 	}
-	if (first_item + visible_items_count > (int)items.size()) first_item = (int)items.size() - visible_items_count;
-	if (first_item < 0) first_item = 0;
-	scroll_bar = (items.size() > visible_items_count);
-	if (scroll_bar)
-	{
-		scroll_bar_width = fs;
-		auto scroll_bar_x = oo.x.max - scroll_bar_width - 3;
-		scene->canvas.vertical_line(scroll_bar_x, oo.y, ui_list_line_color);
-		auto thumb_track = oo.y.expanded(-1).expanded(-ui_list_scroll_bar_indent);
-		int thumb_height = (int)(thumb_track.length() * visible_items_count / items.size());
-		if (thumb_height < 1) thumb_height = 1;
-		int thumb_offset = (int)((thumb_track.length() - thumb_height) * first_item / (items.size() - visible_items_count));
-		auto thumb = recti({ scroll_bar_x + ui_list_scroll_bar_indent + 1, oo.x.max - ui_list_scroll_bar_indent - 1 }, { thumb_track.min + thumb_offset, thumb_track.min + thumb_offset + thumb_height });
-		scene->canvas.rectangle(thumb, ui_list_scroll_bar_color);
-		auto oo2 = oo;
-		oo2.x.max -= scroll_bar_width + 3;
-		scene->canvas.set_gdi_clip(oo2);
-	}
+	first_item = std::clamp(first_item, 0, std::max(0, item_count - visible_items_count));
+	return true;
+}
 
-	for (int i = first_item; i < items.size() && i < first_item + visible_items_count; i++)
+void ui_list::draw_scroll_bar(recti bounds, int scaled_font_size)
+{
+	int item_count = (int)items.size();
+	if (item_count <= visible_items_count) return;
+
+	int bar_width = scaled_font_size;
+	int bar_x = (int)bounds.x.max - bar_width - 3;
+	scene->canvas.vertical_line(bar_x, bounds.y, ui_list_line_color);
+
+	auto track = bounds.y.expanded(-1).expanded(-ui_list_scroll_bar_indent);
+	int thumb_height = std::max(1, (int)(track.length() * visible_items_count / item_count));
+	int scroll_range = item_count - visible_items_count;
+	int thumb_offset = (int)((track.length() - thumb_height) * first_item / scroll_range);
+	auto thumb = recti(
+		{ bar_x + ui_list_scroll_bar_indent + 1, (int)bounds.x.max - ui_list_scroll_bar_indent - 1 },
+		{ track.min + thumb_offset, track.min + thumb_offset + thumb_height });
+	scene->canvas.rectangle(thumb, ui_list_scroll_bar_color);
+}
+
+void ui_list::draw_items(recti bounds, int scaled_font_size)
+{
+	if ((int)items.size() > visible_items_count)
+		bounds.x.max -= scaled_font_size + 3;
+	scene->canvas.set_gdi_clip(bounds);
+
+	int last_item = std::min((int)items.size(), first_item + visible_items_count);
+	for (int item = first_item; item < last_item; ++item)
 	{
-		scene->canvas.text(oo.top_left() + ixy(2, element_height * i + 1), items[i], fs, ui_list_text_color, {0});
+		int row = item - first_item;
+		scene->canvas.text(bounds.top_left() + ixy(2, element_height * row + 1),
+			items[item], scaled_font_size, ui_list_text_color, { 0 });
 	}
 
 	scene->canvas.set_gdi_clip();

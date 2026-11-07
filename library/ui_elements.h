@@ -138,6 +138,9 @@ private:
 	int visible_items_count = 0;
 	int element_height = 0;
 	int first_item = 0; // номер первого отображаемого элемента
-	bool scroll_bar = false;
-	int scroll_bar_width = 8;
+
+	void draw_frame(recti bounds);
+	bool prepare_layout(recti bounds, int scaled_font_size);
+	void draw_scroll_bar(recti bounds, int scaled_font_size);
+	void draw_items(recti bounds, int scaled_font_size);
 };
