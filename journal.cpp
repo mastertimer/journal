@@ -50,6 +50,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_MOUSELEAVE:
         tracking_mouse = false;
         break;
+    case WM_LBUTTONDOWN:
+        scene.mouse_click((short)LOWORD(lParam), (short)HIWORD(lParam));
+        paint(hWnd);
+        break;
     case WM_MOUSEMOVE:
         if (!tracking_mouse)
         {

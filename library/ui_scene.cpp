@@ -44,3 +44,8 @@ void ui_scene::mouse_move(short x, short y)
 {
 	root->mouse_move({ double(x), double(y) });
 }
+
+void ui_scene::mouse_click(short x, short y)
+{
+	root->mouse_click({ double(x), double(y) });
+}

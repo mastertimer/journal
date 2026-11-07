@@ -71,6 +71,14 @@ bool ui_element::mouse_move(xy mouse_pos)
 	return local_region->test(mouse_pos) && mouse_move2(mouse_pos);
 }
 
+bool ui_element::mouse_click(xy mouse_pos)
+{
+	mouse_pos = trans.inverse()(mouse_pos);
+	if (!calc_combined_region().test(mouse_pos)) return false;
+	for (auto& element : children) if (element->mouse_click(mouse_pos)) return true;
+	return local_region->test(mouse_pos) && mouse_click2(mouse_pos);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ui_text::draw(transform tr)
@@ -171,6 +179,27 @@ void ui_text_edit::set_text(std::wstring_view t)
 	if (text == t) return;
 	text = t;
 	update_regions(std::nullopt, region_change::modify);
+}
+
+bool ui_text_edit::mouse_click2(xy r)
+{
+	int sf = font_size;
+	int text_x = (int)local_region->x.min + 5;
+	int x = (int)r.x - text_x;
+	int position = first;
+	if (x > 0)
+	{
+		for (int i = first; i < first + len2; ++i)
+		{
+			int left = scene->canvas.size_text(std::wstring_view(text).substr(first, i - first), sf).x;
+			int right = scene->canvas.size_text(std::wstring_view(text).substr(first, i + 1 - first), sf).x;
+			if (x < left + (right - left + 1) / 2) break;
+			position = i + 1;
+		}
+	}
+	cursor = position;
+	update_regions({}, region_change::modify);
+	return true;
 }
 
 void ui_text_edit::key_down(u64 key)

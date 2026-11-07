@@ -40,6 +40,8 @@ struct ui_element
 	virtual void key_press(u64 key) {}
 	bool mouse_move(xy mouse_pos); // перемещение мышки
 	virtual bool mouse_move2(xy r) { return true;  } // перемещение мышки действие
+	bool mouse_click(xy mouse_pos); // щелчок мышью
+	virtual bool mouse_click2(xy r) { return true; } // действие по щелчку мышью
 
 protected:
 	std::optional<rect> local_region;
@@ -82,6 +84,7 @@ struct ui_text_edit : public ui_element
 	void draw(transform tr) override;
 	void key_down(u64 key) override;
 	void key_press(u64 key) override;
+	bool mouse_click2(xy r) override;
 
 	void set_text(std::wstring_view t);
 
