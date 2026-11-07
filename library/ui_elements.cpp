@@ -274,7 +274,14 @@ void ui_list::draw(transform tr)
 	if (scroll_bar)
 	{
 		scroll_bar_width = fs;
-		scene->canvas.vertical_line(oo.x.max - scroll_bar_width - 3, oo.y, white_color);
+		auto scroll_bar_x = oo.x.max - scroll_bar_width - 3;
+		scene->canvas.vertical_line(scroll_bar_x, oo.y, ui_list_line_color);
+		auto thumb_track = oo.y.expanded(-1).expanded(-ui_list_scroll_bar_indent);
+		int thumb_height = (int)(thumb_track.length() * visible_items_count / items.size());
+		if (thumb_height < 1) thumb_height = 1;
+		int thumb_offset = (int)((thumb_track.length() - thumb_height) * first_item / (items.size() - visible_items_count));
+		auto thumb = recti({ scroll_bar_x + ui_list_scroll_bar_indent + 1, oo.x.max - ui_list_scroll_bar_indent - 1 }, { thumb_track.min + thumb_offset, thumb_track.min + thumb_offset + thumb_height });
+		scene->canvas.rectangle(thumb, ui_list_scroll_bar_color);
 		auto oo2 = oo;
 		oo2.x.max -= scroll_bar_width + 3;
 		scene->canvas.set_gdi_clip(oo2);
@@ -282,7 +289,7 @@ void ui_list::draw(transform tr)
 
 	for (int i = first_item; i < items.size() && i < first_item + visible_items_count; i++)
 	{
-		scene->canvas.text(oo.top_left() + ixy(2, element_height * i + 1), items[i], fs, red_color, {0});
+		scene->canvas.text(oo.top_left() + ixy(2, element_height * i + 1), items[i], fs, ui_list_text_color, {0});
 	}
 
 	scene->canvas.set_gdi_clip();

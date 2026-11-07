@@ -111,6 +111,11 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+constexpr int ui_list_scroll_bar_indent = 2;
+constexpr color ui_list_line_color = { 0xFFFFFFFF };
+constexpr color ui_list_text_color = { 0xFFFFFFFF };
+constexpr color ui_list_scroll_bar_color = { 0xFFFFFFFF };
+
 struct ui_list : public ui_element
 {
 	ui_list();
