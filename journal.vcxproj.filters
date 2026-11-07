@@ -16,16 +16,22 @@
     <Filter Include="Исходные файлы\library">
       <UniqueIdentifier>{c8523861-11c5-44ab-a9dd-640aa4695e67}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\app">
+      <UniqueIdentifier>{f8d73c61-23c0-43bd-bd53-580d8e977593}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Файлы заголовков\library">
       <UniqueIdentifier>{a76feda0-8178-484e-8730-3ea63f69d19d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\app">
+      <UniqueIdentifier>{b2246816-9238-4e33-9e58-06ef3347be8b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="journal.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="library\ui_layout.cpp">
-      <Filter>Исходные файлы\library</Filter>
+    <ClCompile Include="app\ui_layout.cpp">
+      <Filter>Исходные файлы\app</Filter>
     </ClCompile>
     <ClCompile Include="library\bitmap.cpp">
       <Filter>Исходные файлы\library</Filter>
@@ -69,8 +75,8 @@
     <ClInclude Include="library\ui_scene.h">
       <Filter>Файлы заголовков\library</Filter>
     </ClInclude>
-    <ClInclude Include="library\ui_layout.h">
-      <Filter>Файлы заголовков\library</Filter>
+    <ClInclude Include="app\ui_layout.h">
+      <Filter>Файлы заголовков\app</Filter>
     </ClInclude>
     <ClInclude Include="library\ui_elements.h">
       <Filter>Файлы заголовков\library</Filter>

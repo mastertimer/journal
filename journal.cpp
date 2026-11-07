@@ -4,7 +4,7 @@
 #include <windows.h>
 
 #include "ui_scene.h"
-#include "ui_layout.h"
+#include "app/ui_layout.h"
 
 namespace
 {

@@ -149,7 +149,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="journal.cpp" />
-    <ClCompile Include="library\ui_layout.cpp" />
+    <ClCompile Include="app\ui_layout.cpp" />
     <ClCompile Include="library\bitmap.cpp" />
     <ClCompile Include="library\base.cpp" />
     <ClCompile Include="library\geometry.cpp" />
@@ -169,7 +169,7 @@
     <ClInclude Include="library\geometry.h" />
     <ClInclude Include="library\ui_elements.h" />
     <ClInclude Include="library\ui_scene.h" />
-    <ClInclude Include="library\ui_layout.h" />
+    <ClInclude Include="app\ui_layout.h" />
     <ClInclude Include="library\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
