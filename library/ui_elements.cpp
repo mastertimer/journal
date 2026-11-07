@@ -115,25 +115,43 @@ ui_text_edit::ui_text_edit()
 
 void ui_text_edit::draw(transform tr)
 {
-	auto oo = recti(tr(*local_region));
-	scene->canvas.fill_rectangle(oo.expanded(-1), black_color);
-	scene->canvas.rectangle(oo, white_color);
+	auto bounds = recti(tr(*local_region));
+	draw_frame(bounds);
+
 	int sf = (int)(font_size * tr.scale + 0.5);
 	if (sf < 1) return;
-	i64 top_indent = (oo.y.length() - sf) / 2;
-	int available_width = (int)oo.x.length() - 8;
-	update_visible_text(sf, available_width);
-	if (visible_text_begin < visible_text_end)
-	{
-		scene->canvas.text({ oo.x.min + 5, oo.y.min + top_indent }, text.substr(visible_text_begin, visible_text_end - visible_text_begin), sf, white_color, { 0 });
-		if (visible_text_begin > 0) scene->canvas.vertical_line(oo.x.min + 2, oo.y.expanded(-1), { 0xFF30C0F0 });
-		if (visible_text_end < (int)text.size()) scene->canvas.vertical_line(oo.x.max - 3, oo.y.expanded(-1), { 0xFF30C0F0 });
-	}
+	i64 top_indent = (bounds.y.length() - sf) / 2;
+	update_visible_text(sf, (int)bounds.x.length() - 8);
+	draw_visible_text(bounds, sf, top_indent);
 	if (scene->keyboard_target.lock().get() == this)
-	{
-		size2i size = scene->canvas.size_text(text.substr(visible_text_begin, cursor - visible_text_begin), sf);
-		scene->canvas.vertical_line( oo.x.min + 4 + size.x, { oo.y.min + top_indent , oo.y.min + sf + top_indent }, white_color);
-	}
+		draw_cursor(bounds, sf, top_indent);
+}
+
+void ui_text_edit::draw_frame(recti bounds)
+{
+	scene->canvas.fill_rectangle(bounds.expanded(-1), black_color);
+	scene->canvas.rectangle(bounds, white_color);
+}
+
+void ui_text_edit::draw_visible_text(recti bounds, int scaled_font_size, i64 top_indent)
+{
+	if (visible_text_begin < visible_text_end)
+		scene->canvas.text({ bounds.x.min + 5, bounds.y.min + top_indent },
+			text.substr(visible_text_begin, visible_text_end - visible_text_begin),
+			scaled_font_size, white_color, { 0 });
+
+	if (visible_text_begin > 0)
+		scene->canvas.vertical_line(bounds.x.min + 2, bounds.y.expanded(-1), { 0xFF30C0F0 });
+	if (visible_text_end < (int)text.size())
+		scene->canvas.vertical_line(bounds.x.max - 3, bounds.y.expanded(-1), { 0xFF30C0F0 });
+}
+
+void ui_text_edit::draw_cursor(recti bounds, int scaled_font_size, i64 top_indent)
+{
+	auto cursor_text = text.substr(visible_text_begin, cursor - visible_text_begin);
+	i64 cursor_offset = scene->canvas.size_text(cursor_text, scaled_font_size).x;
+	scene->canvas.vertical_line(bounds.x.min + 4 + cursor_offset,
+		{ bounds.y.min + top_indent, bounds.y.min + scaled_font_size + top_indent }, white_color);
 }
 
 void ui_text_edit::update_visible_text(int scaled_font_size, int available_width)

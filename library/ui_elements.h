@@ -97,6 +97,9 @@ private:
 	int visible_text_end = 0; // индекс после последнего отображаемого символа
 
 	void update_visible_text(int scaled_font_size, int available_width);
+	void draw_frame(recti bounds);
+	void draw_visible_text(recti bounds, int scaled_font_size, i64 top_indent);
+	void draw_cursor(recti bounds, int scaled_font_size, i64 top_indent);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
