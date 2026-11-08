@@ -381,12 +381,13 @@ bitmap::bitmap(const bitmap& copy) : picture({0,0})
 	hdc = CreateCompatibleDC(nullptr);
 
 	if (!hdc) return;
-	resize(copy.size);
+	if (!copy.size.empty() && !resize(copy.size)) return;
 
 	transparent = copy.transparent;
 	set_drawing_rect(copy.drawing_rect);
 
-	memcpy(data, copy.data, size.count() * sizeof(color));
+	if (!size.empty() && data && copy.data)
+		memcpy(data, copy.data, size.count() * sizeof(color));
 	set_gdi_clip();
 }
 
@@ -416,7 +417,7 @@ bitmap& bitmap::operator=(const bitmap& copy)
 		if (!hdc) return *this;
 	}
 
-	resize(copy.size);
+	if (size != copy.size && !resize(copy.size)) return *this;
 
 	transparent = copy.transparent;
 	set_drawing_rect(copy.drawing_rect);
