@@ -178,6 +178,11 @@ struct transform
 	double scale = 1.0;
 	xy offset = { 0.0, 0.0 };
 
+	bool operator==(const transform& b) const
+	{
+		return scale == b.scale && offset.x == b.offset.x && offset.y == b.offset.y;
+	}
+
 	rect operator()(const rect& b) const;
 	xy operator()(const xy b) const;
 

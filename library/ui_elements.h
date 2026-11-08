@@ -22,7 +22,6 @@ enum class region_change
 
 struct ui_element : public std::enable_shared_from_this<ui_element>
 {
-	transform trans;
     ui_element* parent = nullptr;
     std::vector<std::shared_ptr<ui_element>> children;
     std::unique_ptr<bitmap> render_cache;
@@ -31,6 +30,7 @@ struct ui_element : public std::enable_shared_from_this<ui_element>
 	virtual ~ui_element() {}
 
     void render(transform tr); // нарисовать дерево
+	void set_transform(transform value);
 	void update_regions(std::optional<rect> r, region_change change);
 	rect& calc_combined_region(); // вычислить полную область
 	virtual rect& calc_local_region(); // вычислить локальную область
@@ -50,6 +50,9 @@ protected:
 	std::optional<rect> combined_region; // local_region + children.local_region
 
 	virtual void draw(transform tr) {}
+
+private:
+	transform trans_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

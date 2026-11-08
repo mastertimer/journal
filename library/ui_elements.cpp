@@ -7,11 +7,19 @@
 
 void ui_element::render(transform tr)
 {
-	tr *= trans;
+	tr *= trans_;
 	if ((tr(calc_combined_region()) & scene->changed_region).empty()) return;
 	scene->canvas.set_drawing_rect(tr(calc_local_region()) & scene->changed_region);
 	draw(tr);
 	for (auto& element : children) element->render(tr);
+}
+
+void ui_element::set_transform(transform value)
+{
+	if (trans_ == value) return;
+	update_regions({}, region_change::remove);
+	trans_ = value;
+	update_regions({}, region_change::add);
 }
 
 void ui_element::add_child(std::shared_ptr<ui_element> element)
@@ -40,10 +48,10 @@ void ui_element::update_regions(std::optional<rect> r, region_change change)
 			combined_region.reset();
 	if (!parent)
 	{
-		if (scene && scene->root.get() == this)	scene->add_changed_rect(trans(*r));
+		if (scene && scene->root.get() == this)	scene->add_changed_rect(trans_(*r));
 		return;
 	}
-	parent->update_regions(trans(*r), change);
+	parent->update_regions(trans_(*r), change);
 }
 
 rect& ui_element::calc_combined_region()
@@ -53,7 +61,7 @@ rect& ui_element::calc_combined_region()
 	for (auto& element : children)
 	{
 		element->calc_combined_region();
-		*combined_region |= element->trans(*element->combined_region);
+		*combined_region |= element->trans_(*element->combined_region);
 	}
 	return *combined_region;
 }
@@ -67,7 +75,7 @@ rect& ui_element::calc_local_region()
 
 bool ui_element::mouse_move(xy screen_mouse_pos, transform tr)
 {
-	tr *= trans;
+	tr *= trans_;
 	if (!tr(calc_combined_region()).test(screen_mouse_pos)) return false;
 	for (auto& element : children) if (element->mouse_move(screen_mouse_pos, tr)) return true;
 	return tr(calc_local_region()).test(screen_mouse_pos) && mouse_move2(screen_mouse_pos, tr);
@@ -75,7 +83,7 @@ bool ui_element::mouse_move(xy screen_mouse_pos, transform tr)
 
 bool ui_element::mouse_click(xy screen_mouse_pos, transform tr)
 {
-	tr *= trans;
+	tr *= trans_;
 	if (!tr(calc_combined_region()).test(screen_mouse_pos)) return false;
 	for (auto& element : children) if (element->mouse_click(screen_mouse_pos, tr)) return true;
 	if (tr(calc_local_region()).test(screen_mouse_pos) && mouse_click2(screen_mouse_pos, tr))
