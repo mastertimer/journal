@@ -197,10 +197,10 @@ bool ui_text_edit::mouse_click2(xy screen_mouse_pos, transform tr)
 	auto bounds = recti(tr(*local_region));
 	int x = (int)screen_mouse_pos.x - (int)bounds.x.min - 5;
 	int position = (int)visible_text.min;
-	auto visible = std::wstring_view(text).substr(visible_text.min, visible_text.length());
-	auto measurement = scene->canvas.measure_text_fit(visible, sf, (int)bounds.x.length() - 8);
 	if (x > 0)
 	{
+		auto visible = std::wstring_view(text).substr(visible_text.min, visible_text.length());
+		auto measurement = scene->canvas.measure_text_fit(visible, sf, (int)bounds.x.length() - 8);
 		int count = std::min(measurement.fitting_characters, (int)measurement.prefix_widths.size());
 		for (int i = 0; i < count; ++i)
 		{
@@ -350,15 +350,17 @@ void ui_list::draw_items(recti bounds, int scaled_font_size)
 {
 	if ((int)items.size() > visible_items_count)
 		bounds.x.max -= scaled_font_size + 3;
-	scene->canvas.set_gdi_clip(bounds);
 
 	int last_item = std::min((int)items.size(), first_item + visible_items_count);
+	int text_width = (int)bounds.x.length() - 2;
 	for (int item = first_item; item < last_item; ++item)
 	{
 		int row = item - first_item;
+		std::wstring_view text = items[item];
+		auto fit = scene->canvas.measure_text_fit(text, scaled_font_size, text_width);
+		int fitting_characters = std::clamp(fit.fitting_characters, 0, (int)text.size());
+		text = text.substr(0, fitting_characters);
 		scene->canvas.text(bounds.top_left() + ixy(2, element_height * row + 1),
-			items[item], scaled_font_size, ui_list_text_color, { 0 });
+			text, scaled_font_size, ui_list_text_color, { 0 });
 	}
-
-	scene->canvas.set_gdi_clip();
 }
