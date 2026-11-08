@@ -40,12 +40,30 @@ void ui_scene::key_press(u64 key)
 	}
 }
 
-void ui_scene::mouse_move(short x, short y)
+void ui_scene::mouse_move(short x, short y, bool left_button_down)
 {
-	root->mouse_move({ double(x), double(y) });
+	xy screen_mouse_pos{ double(x), double(y) };
+	if (auto captured = mouse_capture.lock())
+	{
+		if (left_button_down)
+		{
+			captured->mouse_move2(screen_mouse_pos, mouse_capture_transform);
+			return;
+		}
+		captured->mouse_up2(screen_mouse_pos, mouse_capture_transform);
+		mouse_capture.reset();
+	}
+	root->mouse_move(screen_mouse_pos);
 }
 
 void ui_scene::mouse_click(short x, short y)
 {
 	root->mouse_click({ double(x), double(y) });
+}
+
+void ui_scene::mouse_release(short x, short y)
+{
+	if (auto captured = mouse_capture.lock())
+		captured->mouse_up2({ double(x), double(y) }, mouse_capture_transform);
+	mouse_capture.reset();
 }

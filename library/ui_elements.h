@@ -43,6 +43,7 @@ struct ui_element : public std::enable_shared_from_this<ui_element>
 	virtual bool mouse_move2(xy screen_mouse_pos, transform tr) { return true; } // действие по перемещению мыши
 	bool mouse_click(xy screen_mouse_pos, transform tr = {}); // щелчок мышью
 	virtual bool mouse_click2(xy screen_mouse_pos, transform tr) { return true; } // действие по щелчку мышью
+	virtual void mouse_up2(xy screen_mouse_pos, transform tr) {}
 
 protected:
 	std::optional<rect> local_region;
@@ -130,6 +131,9 @@ struct ui_list : public ui_element
 	ui_list();
 
 	void draw(transform tr) override;
+	bool mouse_click2(xy screen_mouse_pos, transform tr) override;
+	bool mouse_move2(xy screen_mouse_pos, transform tr) override;
+	void mouse_up2(xy screen_mouse_pos, transform tr) override;
 
 private:
 	std::vector<std::wstring> items;
@@ -139,10 +143,13 @@ private:
 	int visible_items_count = 0;
 	int element_height = 0;
 	int first_item = 0; // номер первого отображаемого элемента
+	bool dragging_scroll_bar = false;
+	int scroll_drag_offset = 0;
 
 	void draw_frame(recti bounds);
 	bool prepare_layout(recti bounds, int scaled_font_size);
 	void draw_scroll_bar(recti bounds, int scaled_font_size);
 	void draw_items(recti bounds, int scaled_font_size);
 	void draw_selected_item(recti bounds, int scaled_font_size);
+	recti scroll_thumb_bounds(recti bounds, int scaled_font_size) const;
 };

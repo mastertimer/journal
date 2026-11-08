@@ -328,11 +328,20 @@ void ui_list::draw_frame(recti bounds)
 
 bool ui_list::prepare_layout(recti bounds, int scaled_font_size)
 {
-	if (items.empty() || scaled_font_size < 1) return false;
+	if (items.empty() || scaled_font_size < 1)
+	{
+		selected_item.reset();
+		visible_items_count = 0;
+		return false;
+	}
 
 	element_height = scaled_font_size + vertical_indentation * 2;
 	visible_items_count = (int)((bounds.y.length() - 2) / element_height);
-	if (visible_items_count < 1) return false;
+	if (visible_items_count < 1)
+	{
+		selected_item.reset();
+		return false;
+	}
 
 	int item_count = (int)items.size();
 	first_item = std::clamp(first_item, 0, std::max(0, item_count - visible_items_count));
@@ -349,15 +358,21 @@ void ui_list::draw_scroll_bar(recti bounds, int scaled_font_size)
 	int bar_width = scaled_font_size;
 	int bar_x = (int)bounds.x.max - bar_width - 3;
 	scene->canvas.vertical_line(bar_x, bounds.y, ui_list_line_color);
+	scene->canvas.rectangle(scroll_thumb_bounds(bounds, scaled_font_size), ui_list_scroll_bar_color);
+}
 
+
+recti ui_list::scroll_thumb_bounds(recti bounds, int scaled_font_size) const
+{
+	int item_count = (int)items.size();
 	auto track = bounds.y.expanded(-1).expanded(-ui_list_scroll_bar_indent);
 	int thumb_height = std::max(1, (int)(track.length() * visible_items_count / item_count));
 	int scroll_range = item_count - visible_items_count;
 	int thumb_offset = (int)((track.length() - thumb_height) * first_item / scroll_range);
-	auto thumb = recti(
+	int bar_x = (int)bounds.x.max - scaled_font_size - 3;
+	return recti(
 		{ bar_x + ui_list_scroll_bar_indent + 1, (int)bounds.x.max - ui_list_scroll_bar_indent - 1 },
 		{ track.min + thumb_offset, track.min + thumb_offset + thumb_height });
-	scene->canvas.rectangle(thumb, ui_list_scroll_bar_color);
 }
 
 void ui_list::draw_items(recti bounds, int scaled_font_size)
@@ -390,4 +405,77 @@ void ui_list::draw_selected_item(recti bounds, int scaled_font_size)
 	intervali item_y{ bounds.y.min + 1 + element_height * row,
 		bounds.y.min + 1 + element_height * (row + 1) };
 	scene->canvas.rectangle({ item_x, item_y }, ui_list_selected_item_color);
+}
+
+bool ui_list::mouse_click2(xy screen_mouse_pos, transform tr)
+{
+	int scaled_font_size = (int)(font_size * tr.scale + 0.5);
+	auto bounds = recti(tr(*local_region));
+	if (!prepare_layout(bounds, scaled_font_size)) return true;
+
+	int item_count = (int)items.size();
+	if (item_count > visible_items_count)
+	{
+		int bar_x = (int)bounds.x.max - scaled_font_size - 3;
+		if (screen_mouse_pos.x >= bar_x)
+		{
+			auto thumb = scroll_thumb_bounds(bounds, scaled_font_size);
+			if (screen_mouse_pos.y >= thumb.y.min && screen_mouse_pos.y < thumb.y.max)
+			{
+				dragging_scroll_bar = true;
+				scroll_drag_offset = (int)screen_mouse_pos.y - (int)thumb.y.min;
+				scene->mouse_capture = shared_from_this();
+				scene->mouse_capture_transform = tr;
+			}
+			return true;
+		}
+	}
+
+	double row_offset = screen_mouse_pos.y - bounds.y.min - 1;
+	if (row_offset < 0) return true;
+	int row = (int)(row_offset / element_height);
+	if (row < 0 || row >= visible_items_count) return true;
+	int item = first_item + row;
+	if (item >= 0 && item < item_count && selected_item != item)
+	{
+		selected_item = item;
+		update_regions({}, region_change::modify);
+	}
+	return true;
+}
+
+bool ui_list::mouse_move2(xy screen_mouse_pos, transform tr)
+{
+	if (!dragging_scroll_bar) return true;
+
+	auto bounds = recti(tr(*local_region));
+	int scaled_font_size = (int)(font_size * tr.scale + 0.5);
+	if (!prepare_layout(bounds, scaled_font_size)) return true;
+
+	int item_count = (int)items.size();
+	int scroll_range = item_count - visible_items_count;
+	if (scroll_range <= 0) return true;
+
+	auto thumb = scroll_thumb_bounds(bounds, scaled_font_size);
+	auto track = bounds.y.expanded(-1).expanded(-ui_list_scroll_bar_indent);
+	int thumb_travel = (int)(track.length() - thumb.y.length());
+	if (thumb_travel <= 0) return true;
+
+	int thumb_top = (int)screen_mouse_pos.y - scroll_drag_offset;
+	thumb_top = std::clamp(thumb_top, (int)track.min, (int)(track.max - thumb.y.length()));
+	int new_first_item = (int)(((thumb_top - track.min) * scroll_range + thumb_travel / 2) / thumb_travel);
+	new_first_item = std::clamp(new_first_item, 0, scroll_range);
+	if (new_first_item != first_item)
+	{
+		first_item = new_first_item;
+		if (selected_item && (*selected_item < first_item || *selected_item >= first_item + visible_items_count))
+			selected_item.reset();
+		update_regions({}, region_change::modify);
+	}
+	return true;
+}
+
+void ui_list::mouse_up2(xy, transform)
+{
+	dragging_scroll_bar = false;
 }

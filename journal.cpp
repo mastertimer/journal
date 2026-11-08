@@ -54,6 +54,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         scene.mouse_click((short)LOWORD(lParam), (short)HIWORD(lParam));
         paint(hWnd);
         break;
+    case WM_LBUTTONUP:
+        scene.mouse_release((short)LOWORD(lParam), (short)HIWORD(lParam));
+        paint(hWnd);
+        break;
     case WM_MOUSEMOVE:
         if (!tracking_mouse)
         {
@@ -64,7 +68,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             a.hwndTrack = hWnd;
             TrackMouseEvent(&a);
         }
-        scene.mouse_move((short)LOWORD(lParam), (short)HIWORD(lParam));
+        scene.mouse_move((short)LOWORD(lParam), (short)HIWORD(lParam), (wParam & MK_LBUTTON) != 0);
         paint(hWnd);
         break;
     case WM_PAINT:
