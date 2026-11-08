@@ -65,20 +65,20 @@ rect& ui_element::calc_local_region()
 	return *local_region;
 }
 
-bool ui_element::mouse_move(xy mouse_pos)
+bool ui_element::mouse_move(xy screen_mouse_pos, transform tr)
 {
-	mouse_pos = trans.inverse()(mouse_pos);
-	if (!calc_combined_region().test(mouse_pos)) return false;
-	for (auto& element : children) if (element->mouse_move(mouse_pos)) return true;
-	return local_region->test(mouse_pos) && mouse_move2(mouse_pos);
+	tr *= trans;
+	if (!tr(calc_combined_region()).test(screen_mouse_pos)) return false;
+	for (auto& element : children) if (element->mouse_move(screen_mouse_pos, tr)) return true;
+	return tr(calc_local_region()).test(screen_mouse_pos) && mouse_move2(screen_mouse_pos, tr);
 }
 
-bool ui_element::mouse_click(xy mouse_pos)
+bool ui_element::mouse_click(xy screen_mouse_pos, transform tr)
 {
-	mouse_pos = trans.inverse()(mouse_pos);
-	if (!calc_combined_region().test(mouse_pos)) return false;
-	for (auto& element : children) if (element->mouse_click(mouse_pos)) return true;
-	return local_region->test(mouse_pos) && mouse_click2(mouse_pos);
+	tr *= trans;
+	if (!tr(calc_combined_region()).test(screen_mouse_pos)) return false;
+	for (auto& element : children) if (element->mouse_click(screen_mouse_pos, tr)) return true;
+	return tr(calc_local_region()).test(screen_mouse_pos) && mouse_click2(screen_mouse_pos, tr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -191,14 +191,14 @@ void ui_text_edit::set_text(std::wstring_view t)
 	update_regions(std::nullopt, region_change::modify);
 }
 
-bool ui_text_edit::mouse_click2(xy r)
+bool ui_text_edit::mouse_click2(xy screen_mouse_pos, transform tr)
 {
-	int sf = font_size;
-	int text_x = (int)local_region->x.min + 5;
-	int x = (int)r.x - text_x;
+	int sf = (int)(font_size * tr.scale + 0.5);
+	auto bounds = recti(tr(*local_region));
+	int x = (int)screen_mouse_pos.x - (int)bounds.x.min - 5;
 	int position = (int)visible_text.min;
 	auto visible = std::wstring_view(text).substr(visible_text.min, visible_text.length());
-	auto measurement = scene->canvas.measure_text_fit(visible, sf, (int)local_region->x.length() - 8);
+	auto measurement = scene->canvas.measure_text_fit(visible, sf, (int)bounds.x.length() - 8);
 	if (x > 0)
 	{
 		int count = std::min(measurement.fitting_characters, (int)measurement.prefix_widths.size());
