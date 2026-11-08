@@ -3,7 +3,7 @@
 
 void initialize_ui_scene(ui_scene& scene)
 {
-    scene.data.types.push_back({ L"Вес", 0 });
+    scene.data.types.push_back({ L"Вес", 1 });
 
     auto list = std::make_shared<ui_list>();
     list->set_transform({ 1.0, { 100, 150 } });
@@ -47,4 +47,13 @@ void initialize_ui_scene(ui_scene& scene)
                 }
     };
     number_input->add_child(accept);
+
+    auto save = std::make_shared<ui_button>();
+    save->set_caption(L"Сохранить данные");
+    save->set_transform({ 1.0, { 100, 500 } });
+    save->on_click = [&scene]
+    {
+        scene.data.write_to_file(L"e:/test.txt");
+    };
+    scene.root->add_child(save);
 }
