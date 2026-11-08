@@ -83,7 +83,12 @@ rect& ui_element::calc_local_region()
 bool ui_element::mouse_move(xy screen_mouse_pos, transform tr)
 {
 	tr *= trans_;
-	if (!tr(calc_combined_region()).test(screen_mouse_pos)) return false;
+	if (!tr(calc_combined_region()).test(screen_mouse_pos))
+	{
+		mouse_leave2();
+		for (auto& element : children) element->mouse_move(screen_mouse_pos, tr);
+		return false;
+	}
 	for (auto& element : children) if (element->mouse_move(screen_mouse_pos, tr)) return true;
 	return tr(calc_local_region()).test(screen_mouse_pos) && mouse_move2(screen_mouse_pos, tr);
 }
@@ -95,12 +100,15 @@ bool ui_element::mouse_click(xy screen_mouse_pos, transform tr)
 	for (auto& element : children) if (element->mouse_click(screen_mouse_pos, tr)) return true;
 	if (tr(calc_local_region()).test(screen_mouse_pos) && mouse_click2(screen_mouse_pos, tr))
 	{
-		auto previous_target = scene->keyboard_target.lock();
-		if (previous_target.get() != this)
+		if (accepts_keyboard_focus)
 		{
-			scene->keyboard_target = shared_from_this();
-			if (previous_target) previous_target->update_regions({}, region_change::modify);
-			update_regions({}, region_change::modify);
+			auto previous_target = scene->keyboard_target.lock();
+			if (previous_target.get() != this)
+			{
+				scene->keyboard_target = shared_from_this();
+				if (previous_target) previous_target->update_regions({}, region_change::modify);
+				update_regions({}, region_change::modify);
+			}
 		}
 		return true;
 	}
@@ -136,6 +144,7 @@ void ui_text::set_text(std::wstring_view t)
 
 ui_text_edit::ui_text_edit()
 {
+	accepts_keyboard_focus = true;
 	local_region = rect(size2i{ 200, font_size + vertical_indentation * 2 + 2 });
 }
 
@@ -290,11 +299,49 @@ void ui_button::draw(transform tr)
 {
 	auto oo = recti(tr(*local_region));
 	scene->canvas.fill_rectangle(oo.expanded(-1), black_color);
-	scene->canvas.rectangle(oo, white_color);
+	color frame_color = pressed ? color{ 0xFFFFA000 } : hovered ? color{ 0xFF30C0F0 } : white_color;
+	scene->canvas.rectangle(oo, frame_color);
 	int sf = (int)(font_size * tr.scale + 0.5);
 	auto size = scene->canvas.size_text(caption, font_size);
 
 	scene->canvas.text(oo.center() - size.center(), caption, sf, white_color, { 0 });
+}
+
+bool ui_button::mouse_move2(xy, transform)
+{
+	if (!hovered)
+	{
+		hovered = true;
+		update_regions({}, region_change::modify);
+	}
+	return true;
+}
+
+void ui_button::mouse_leave2()
+{
+	if (hovered)
+	{
+		hovered = false;
+		update_regions({}, region_change::modify);
+	}
+}
+
+bool ui_button::mouse_click2(xy, transform tr)
+{
+	pressed = true;
+	scene->mouse_capture = shared_from_this();
+	scene->mouse_capture_transform = tr;
+	update_regions({}, region_change::modify);
+	if (on_click) on_click();
+	return true;
+}
+
+void ui_button::mouse_up2(xy screen_mouse_pos, transform tr)
+{
+	bool was_pressed = pressed;
+	pressed = false;
+	hovered = recti(tr(*local_region)).test(screen_mouse_pos);
+	if (was_pressed) update_regions({}, region_change::modify);
 }
 
 void ui_button::set_caption(std::wstring_view t)
@@ -308,6 +355,7 @@ void ui_button::set_caption(std::wstring_view t)
 
 ui_list::ui_list() : ui_element()
 {
+	accepts_keyboard_focus = true;
 	local_region = rect(size2i{ 200, (font_size + vertical_indentation * 2) * 5 + 2 }); // 5 строк
 
 	items.push_back(L"Элемент 1");

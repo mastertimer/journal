@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "bitmap.h"
+#include <functional>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -26,6 +27,7 @@ struct ui_element : public std::enable_shared_from_this<ui_element>
     std::vector<std::shared_ptr<ui_element>> children;
     std::unique_ptr<bitmap> render_cache;
 	ui_scene* scene = nullptr;
+	bool accepts_keyboard_focus = false;
 
 	virtual ~ui_element() {}
 
@@ -41,6 +43,7 @@ struct ui_element : public std::enable_shared_from_this<ui_element>
 	virtual void key_press(u64 key) {}
 	bool mouse_move(xy screen_mouse_pos, transform tr = {}); // перемещение мышки
 	virtual bool mouse_move2(xy screen_mouse_pos, transform tr) { return true; } // действие по перемещению мыши
+	virtual void mouse_leave2() {}
 	bool mouse_click(xy screen_mouse_pos, transform tr = {}); // щелчок мышью
 	virtual bool mouse_click2(xy screen_mouse_pos, transform tr) { return true; } // действие по щелчку мышью
 	virtual void mouse_up2(xy screen_mouse_pos, transform tr) {}
@@ -115,11 +118,19 @@ struct ui_button : public ui_element
 
 	void draw(transform tr) override;
 	void set_caption(std::wstring_view c);
+	bool mouse_move2(xy screen_mouse_pos, transform tr) override;
+	void mouse_leave2() override;
+	bool mouse_click2(xy screen_mouse_pos, transform tr) override;
+	void mouse_up2(xy screen_mouse_pos, transform tr) override;
+
+	std::function<void()> on_click;
 
 private:
 	constexpr static int vertical_indentation = 2;
 	std::wstring caption;
 	int font_size = default_font_size;
+	bool hovered = false;
+	bool pressed = false;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
