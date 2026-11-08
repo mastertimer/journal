@@ -1,10 +1,12 @@
 #pragma once
 
 #include "bitmap.h"
+#include "journal_data.h"
 #include "ui_elements.h"
 
 struct ui_scene
 {
+	journal_data data;
 	bitmap canvas;
 	rect changed_region;
 

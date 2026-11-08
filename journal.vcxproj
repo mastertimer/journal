@@ -169,6 +169,7 @@
     <ClInclude Include="library\geometry.h" />
     <ClInclude Include="library\ui_elements.h" />
     <ClInclude Include="library\ui_scene.h" />
+    <ClInclude Include="library\journal_data.h" />
     <ClInclude Include="app\ui_layout.h" />
     <ClInclude Include="library\utils.h" />
   </ItemGroup>

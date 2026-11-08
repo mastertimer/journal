@@ -75,6 +75,9 @@
     <ClInclude Include="library\ui_scene.h">
       <Filter>Файлы заголовков\library</Filter>
     </ClInclude>
+    <ClInclude Include="library\journal_data.h">
+      <Filter>Файлы заголовков\library</Filter>
+    </ClInclude>
     <ClInclude Include="app\ui_layout.h">
       <Filter>Файлы заголовков\app</Filter>
     </ClInclude>
