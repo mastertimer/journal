@@ -1,12 +1,14 @@
 ﻿#pragma once
 
 #include <chrono>
+#include <cstdint>
 #include <string>
 #include <vector>
 
 struct journal_type
 {
 	std::wstring name;
+	std::uint64_t version = 0;
 };
 
 struct journal_entry
@@ -16,8 +18,21 @@ struct journal_entry
 	double value = 0.0;
 };
 
+inline const std::vector<journal_entry> empty_journal_entries;
+
 struct journal_data
 {
 	std::vector<journal_entry> entries;
 	std::vector<journal_type> types;
+
+	const std::vector<journal_entry>& entries_by_type(size_t type_index);
+
+private:
+	struct type_cache
+	{
+		std::uint64_t version = 0;
+		std::vector<journal_entry> entries;
+	};
+
+	std::vector<type_cache> cached_entries;
 };

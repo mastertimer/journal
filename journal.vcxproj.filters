@@ -45,6 +45,9 @@
     <ClCompile Include="library\ui_scene.cpp">
       <Filter>Исходные файлы\library</Filter>
     </ClCompile>
+    <ClCompile Include="library\journal_data.cpp">
+      <Filter>Исходные файлы\library</Filter>
+    </ClCompile>
     <ClCompile Include="library\ui_elements.cpp">
       <Filter>Исходные файлы\library</Filter>
     </ClCompile>

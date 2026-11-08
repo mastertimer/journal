@@ -155,6 +155,7 @@
     <ClCompile Include="library\geometry.cpp" />
     <ClCompile Include="library\ui_elements.cpp" />
     <ClCompile Include="library\ui_scene.cpp" />
+    <ClCompile Include="library\journal_data.cpp" />
     <ClCompile Include="library\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
