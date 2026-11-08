@@ -1,6 +1,12 @@
 ﻿#include "utils.h"
 #include <unordered_map>
 
+uint64_t next_id()
+{
+    static std::atomic<uint64_t> id = 0;
+    return ++id;
+}
+
 std::wstring crypt(std::wstring s)
 {
     static const std::unordered_map<wchar_t, wchar_t> map =
