@@ -24,6 +24,17 @@ void ui_scene::add_changed_rect(rect a)
 	changed_region |= (a & canvas.get_size());
 }
 
+void ui_scene::all_update()
+{
+	if (!root) return;
+	auto visit = [&](auto&& self, const std::shared_ptr<ui_element>& element) -> void
+	{
+		if (element->update) element->update();
+		for (const auto& child : element->children) self(self, child);
+	};
+	visit(visit, root);
+}
+
 void ui_scene::key_down(u64 key)
 {
 	if (auto target = keyboard_target.lock())

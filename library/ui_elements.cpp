@@ -448,15 +448,16 @@ void ui_button::set_size(size2i size)
 ui_list::ui_list() : ui_element()
 {
 	accepts_keyboard_focus = true;
-	local_region = rect(size2i{ 200, (font_size + vertical_indentation * 2) * 5 + 2 }); // 5 строк
+	local_region = rect(size2i{ 300, (font_size + vertical_indentation * 2) * 5 + 2 }); // 5 строк
+}
 
-	items.push_back(L"Элемент 1");
-	items.push_back(L"Элемент 2");
-	items.push_back(L"Элемент 3");
-	items.push_back(L"Элемент 4 В лесу родилась елечка");
-	items.push_back(L"Элемент 5");
-	items.push_back(L"Элемент 6");
-	selected_item = 3;
+void ui_list::set_items(std::vector<std::wstring> value)
+{
+	if (items == value) return;
+	items = std::move(value);
+	selected_item.reset();
+	first_item = 0;
+	update_regions({}, region_change::modify);
 }
 
 void ui_list::draw(transform tr)

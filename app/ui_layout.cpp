@@ -7,6 +7,19 @@ void initialize_ui_scene(ui_scene& scene)
 
     auto list = std::make_shared<ui_list>();
     list->set_transform({ 1.0, { 100, 150 } });
+    list->update = [&scene, weak = std::weak_ptr<ui_list>(list)]
+    {
+        auto list = weak.lock();
+        if (!list || scene.data.types.empty()) return;
+        const auto& type = scene.data.types[0];
+        if (list->data_version == type.version) return;
+
+        std::vector<std::wstring> items;
+        for (const auto& entry : scene.data.entries_by_type(0))
+            items.push_back(entry.to_string());
+        list->set_items(std::move(items));
+        list->data_version = type.version;
+    };
     scene.root->add_child(list);
 
     auto number_input = std::make_shared<ui_number_input>(0.1, 0.0, 500.0, 1);
@@ -26,7 +39,11 @@ void initialize_ui_scene(ui_scene& scene)
     {
         if (auto button = weak.lock())
             if (auto input = dynamic_cast<ui_number_input*>(button->parent))
-                if (input->scene) input->scene->data.add_entry(0, input->get_value());
+                if (input->scene)
+                {
+                    input->scene->data.add_entry(0, input->get_value());
+                    input->scene->all_update();
+                }
     };
     number_input->add_child(accept);
 }

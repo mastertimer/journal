@@ -1,5 +1,21 @@
 #include "journal_data.h"
 
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+
+std::wstring journal_entry::to_string() const
+{
+	auto time = std::chrono::system_clock::to_time_t(date_time);
+	std::tm local_time{};
+	localtime_s(&local_time, &time);
+
+	std::wostringstream text;
+	text << std::put_time(&local_time, L"%d.%m.%Y %H:%M")
+		<< L" - " << std::fixed << std::setprecision(1) << value;
+	return text.str();
+}
+
 void journal_data::add_entry(size_t type_index, double value)
 {
 	if (type_index >= types.size()) return;

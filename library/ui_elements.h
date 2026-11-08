@@ -28,6 +28,7 @@ struct ui_element : public std::enable_shared_from_this<ui_element>
     std::unique_ptr<bitmap> render_cache;
 	ui_scene* scene = nullptr;
 	bool accepts_keyboard_focus = false;
+	std::function<void()> update;
 
 	virtual ~ui_element() {}
 
@@ -166,6 +167,8 @@ constexpr color ui_list_selected_item_color = { 0xFF00FF00 };
 struct ui_list : public ui_element
 {
 	ui_list();
+	void set_items(std::vector<std::wstring> value);
+	std::uint64_t data_version = 0;
 
 	void draw(transform tr) override;
 	bool mouse_click2(xy screen_mouse_pos, transform tr) override;

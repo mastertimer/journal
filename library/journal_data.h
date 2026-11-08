@@ -16,6 +16,7 @@ struct journal_entry
 	std::chrono::system_clock::time_point date_time;
 	size_t type_index = 0;
 	double value = 0.0;
+	std::wstring to_string() const;
 };
 
 inline const std::vector<journal_entry> empty_journal_entries;
