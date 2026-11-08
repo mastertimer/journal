@@ -22,4 +22,9 @@ void initialize_ui_scene(ui_scene& scene)
     button->set_transform({ 1.0, { 100, 350 } });
     button->set_caption(L"Кнопка");
     scene.root->add_child(button);
+
+    auto number_input = std::make_shared<ui_number_input>(0.25, -10.0, 10.0, 2);
+    number_input->set_transform({ 1.0, { 100, 400 } });
+    number_input->set_value(1.5);
+    scene.root->add_child(number_input);
 }

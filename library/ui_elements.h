@@ -96,6 +96,8 @@ struct ui_text_edit : public ui_element
 	bool mouse_click2(xy screen_mouse_pos, transform tr) override;
 
 	void set_text(std::wstring_view t);
+	std::wstring_view get_text() const { return text; }
+	void set_size(size2i size);
 
 private:
 	constexpr static int vertical_indentation = 2;
@@ -112,12 +114,32 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct ui_number_input : public ui_element
+{
+	ui_number_input(double step = 1.0, double minimum = 0.0,
+		double maximum = 100.0, int decimal_places = 0);
+
+	void set_value(double value);
+	double get_value() const;
+
+	double step;
+	double minimum;
+	double maximum;
+	int decimal_places;
+
+private:
+	void change_value(double direction);
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct ui_button : public ui_element
 {
 	ui_button();
 
 	void draw(transform tr) override;
 	void set_caption(std::wstring_view c);
+	void set_size(size2i size);
 	bool mouse_move2(xy screen_mouse_pos, transform tr) override;
 	void mouse_leave2() override;
 	bool mouse_click2(xy screen_mouse_pos, transform tr) override;

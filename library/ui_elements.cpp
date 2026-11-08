@@ -2,6 +2,9 @@
 #include "ui_scene.h"
 
 #include <algorithm>
+#include <cwchar>
+#include <iomanip>
+#include <sstream>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -226,6 +229,89 @@ void ui_text_edit::set_text(std::wstring_view t)
 	update_regions(std::nullopt, region_change::modify);
 }
 
+void ui_text_edit::set_size(size2i size)
+{
+	if (size.empty() || *local_region == rect(size)) return;
+	update_regions(std::nullopt, region_change::remove);
+	local_region = rect(size);
+	combined_region.reset();
+	update_regions(std::nullopt, region_change::add);
+}
+
+ui_number_input::ui_number_input(double step_, double minimum_, double maximum_, int decimal_places_)
+	: step(std::isfinite(step_) && step_ > 0 ? step_ : 1.0),
+	  minimum(std::isfinite(minimum_) ? minimum_ : 0.0),
+	  maximum(std::isfinite(maximum_) ? maximum_ : 100.0),
+	  decimal_places(std::clamp(decimal_places_, 0, 12))
+{
+	if (minimum > maximum) std::swap(minimum, maximum);
+	constexpr i64 button_size = default_font_size + 6;
+	constexpr i64 gap = 4;
+	constexpr i64 field_width = 120;
+	local_region = rect(size2i{ button_size * 2 + field_width + gap * 2, button_size });
+
+	auto decrease = std::make_shared<ui_button>();
+	decrease->set_size({ button_size, button_size });
+	decrease->set_caption(L"−");
+	decrease->set_transform({ 1.0, { 0, 0 } });
+	decrease->on_click = [this, weak = std::weak_ptr<ui_element>(decrease)]
+	{
+		if (auto button = weak.lock())
+			if (auto input = dynamic_cast<ui_number_input*>(button->parent)) input->change_value(-1.0);
+	};
+	add_child(decrease);
+
+	auto edit = std::make_shared<ui_text_edit>();
+	edit->set_size({ field_width, button_size });
+	edit->set_transform({ 1.0, { button_size + gap, 0 } });
+	add_child(edit);
+
+	auto increase = std::make_shared<ui_button>();
+	increase->set_size({ button_size, button_size });
+	increase->set_caption(L"+");
+	increase->set_transform({ 1.0, { button_size + gap + field_width + gap, 0 } });
+	increase->on_click = [this, weak = std::weak_ptr<ui_element>(increase)]
+	{
+		if (auto button = weak.lock())
+			if (auto input = dynamic_cast<ui_number_input*>(button->parent)) input->change_value(1.0);
+	};
+	add_child(increase);
+	set_value(std::clamp(0.0, minimum, maximum));
+}
+
+double ui_number_input::get_value() const
+{
+	for (const auto& child : children)
+		if (auto edit = dynamic_cast<const ui_text_edit*>(child.get()))
+		{
+			std::wstring value(edit->get_text());
+			wchar_t* end = nullptr;
+			double parsed = std::wcstod(value.c_str(), &end);
+			if (end != value.c_str() && *end == L'\0' && std::isfinite(parsed))
+				return std::clamp(parsed, minimum, maximum);
+			break;
+		}
+	return std::clamp(0.0, minimum, maximum);
+}
+
+void ui_number_input::set_value(double value)
+{
+	value = std::clamp(std::isfinite(value) ? value : minimum, minimum, maximum);
+	std::wostringstream text;
+	text << std::fixed << std::setprecision(decimal_places) << value;
+	for (const auto& child : children)
+		if (auto edit = dynamic_cast<ui_text_edit*>(child.get()))
+		{
+			edit->set_text(text.str());
+			return;
+		}
+}
+
+void ui_number_input::change_value(double direction)
+{
+	set_value(get_value() + direction * step);
+}
+
 bool ui_text_edit::mouse_click2(xy screen_mouse_pos, transform tr)
 {
 	int sf = (int)(font_size * tr.scale + 0.5);
@@ -346,6 +432,15 @@ void ui_button::set_caption(std::wstring_view t)
 	if (caption == t) return;
 	caption = t;
 	update_regions(std::nullopt, region_change::modify);
+}
+
+void ui_button::set_size(size2i size)
+{
+	if (size.empty() || *local_region == rect(size)) return;
+	update_regions(std::nullopt, region_change::remove);
+	local_region = rect(size);
+	combined_region.reset();
+	update_regions(std::nullopt, region_change::add);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
