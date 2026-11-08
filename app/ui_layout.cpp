@@ -1,9 +1,15 @@
 ﻿#include "ui_layout.h"
 #include "ui_elements.h"
 
+namespace
+{
+	constexpr wchar_t journal_data_file[] = L"e:/test.txt";
+}
+
 void initialize_ui_scene(ui_scene& scene)
 {
-    scene.data.types.push_back({ L"Вес", 1 });
+    if (!scene.data.read_from_file(journal_data_file)) return;
+    if (scene.data.types.empty()) return;
 
     auto list = std::make_shared<ui_list>();
     list->set_transform({ 1.0, { 100, 150 } });
@@ -53,7 +59,8 @@ void initialize_ui_scene(ui_scene& scene)
     save->set_transform({ 1.0, { 100, 500 } });
     save->on_click = [&scene]
     {
-        scene.data.write_to_file(L"e:/test.txt");
+        scene.data.write_to_file(journal_data_file);
     };
     scene.root->add_child(save);
+    scene.all_update();
 }
