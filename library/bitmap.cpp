@@ -332,11 +332,16 @@ void picture::rectangle(recti oo, color c)
 
 bitmap::bitmap(size2i s) : picture({0,0}), hdc(CreateCompatibleDC(nullptr))
 {
-	if (hdc) resize(s);
+	if (hdc)
+	{
+		stock_hbm = (HBITMAP)GetCurrentObject(hdc, OBJ_BITMAP);
+		resize(s);
+	}
 }
 
 bitmap::bitmap() : picture({ 0,0 }), hdc(CreateCompatibleDC(nullptr))
 {
+	if (hdc) stock_hbm = (HBITMAP)GetCurrentObject(hdc, OBJ_BITMAP);
 }
 
 bitmap::~bitmap()
@@ -352,20 +357,36 @@ bool bitmap::resize(size2i wh)
 
 	HBITMAP new_hbm = nullptr;
 	color* new_data = nullptr;
+	HGDIOBJ previous_bitmap = nullptr;
 
 	if (!wh.empty())
 	{
 		BITMAPINFO bmi = { sizeof(BITMAPINFOHEADER), (long)wh.x, -(long)wh.y, 1, 32, BI_RGB };
 		new_hbm = CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS, (void**)&new_data, 0, 0);
 		if (!new_hbm) return false;
-		if (!SelectObject(hdc, new_hbm))
+		previous_bitmap = SelectObject(hdc, new_hbm);
+		if (!previous_bitmap || previous_bitmap == HGDI_ERROR)
 		{
 			DeleteObject(new_hbm);
 			return false;
 		}
 	}
+	else if (hbm)
+	{
+		if (!stock_hbm) return false;
+		previous_bitmap = SelectObject(hdc, stock_hbm);
+		if (!previous_bitmap || previous_bitmap == HGDI_ERROR) return false;
+	}
 
-	DeleteObject(hbm);
+	if (hbm && !DeleteObject(hbm))
+	{
+		if (previous_bitmap)
+		{
+			SelectObject(hdc, previous_bitmap);
+			if (new_hbm) DeleteObject(new_hbm);
+		}
+		return false;
+	}
 
 	hbm = new_hbm;
 	data = new_data;
@@ -381,6 +402,7 @@ bitmap::bitmap(const bitmap& copy) : picture({0,0})
 	hdc = CreateCompatibleDC(nullptr);
 
 	if (!hdc) return;
+	stock_hbm = (HBITMAP)GetCurrentObject(hdc, OBJ_BITMAP);
 	if (!copy.size.empty() && !resize(copy.size)) return;
 
 	transparent = copy.transparent;
@@ -391,7 +413,7 @@ bitmap::bitmap(const bitmap& copy) : picture({0,0})
 	set_gdi_clip();
 }
 
-bitmap::bitmap(bitmap&& move) noexcept :picture({0,0}), hdc(move.hdc), hbm(move.hbm)
+bitmap::bitmap(bitmap&& move) noexcept :picture({0,0}), hdc(move.hdc), hbm(move.hbm), stock_hbm(move.stock_hbm)
 {
 	data = move.data;
 	size = move.size;
@@ -402,6 +424,7 @@ bitmap::bitmap(bitmap&& move) noexcept :picture({0,0}), hdc(move.hdc), hbm(move.
 
 	move.hdc = nullptr;
 	move.hbm = nullptr;
+	move.stock_hbm = nullptr;
 	move.data = nullptr;
 	move.selected_font = nullptr;
 	move.drawing_rect = move.size = { 0,0 };
@@ -415,6 +438,7 @@ bitmap& bitmap::operator=(const bitmap& copy)
 	{
 		hdc = CreateCompatibleDC(nullptr);
 		if (!hdc) return *this;
+		stock_hbm = (HBITMAP)GetCurrentObject(hdc, OBJ_BITMAP);
 	}
 
 	if (size != copy.size && !resize(copy.size)) return *this;
@@ -437,6 +461,7 @@ bitmap& bitmap::operator=(bitmap&& move) noexcept
 
 	hdc = move.hdc;
 	hbm = move.hbm;
+	stock_hbm = move.stock_hbm;
 
 	data = move.data;
 	size = move.size;
@@ -447,6 +472,7 @@ bitmap& bitmap::operator=(bitmap&& move) noexcept
 
 	move.hdc = nullptr;
 	move.hbm = nullptr;
+	move.stock_hbm = nullptr;
 	move.data = nullptr;
 	move.selected_font = nullptr;
 	move.drawing_rect = move.size = { 0,0 };

@@ -102,5 +102,6 @@ struct bitmap : public picture
 	text_fit_result measure_text_fit(std::wstring_view s, int h, int max_width, bool bold = false, int font_id = 0);
 
 private:
+	HBITMAP stock_hbm = nullptr;
 	HFONT selected_font = nullptr;
 };
