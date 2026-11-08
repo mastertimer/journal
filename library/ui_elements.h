@@ -118,7 +118,8 @@ private:
 struct ui_number_input : public ui_element
 {
 	ui_number_input(double step = 1.0, double minimum = 0.0,
-		double maximum = 100.0, int decimal_places = 0);
+		double maximum = 100.0, int decimal_places = 0,
+		double default_value = 0.0);
 
 	void set_value(double value);
 	double get_value() const;

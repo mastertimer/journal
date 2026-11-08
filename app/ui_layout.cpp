@@ -22,9 +22,10 @@ void initialize_ui_scene(ui_scene& scene)
     };
     scene.root->add_child(list);
 
-    auto number_input = std::make_shared<ui_number_input>(0.1, 0.0, 500.0, 1);
+    const auto& weight_entries = scene.data.entries_by_type(0);
+    double last_weight = weight_entries.empty() ? 0.0 : weight_entries.back().value;
+    auto number_input = std::make_shared<ui_number_input>(0.1, 0.0, 500.0, 1, last_weight);
     number_input->set_transform({ 1.0, { 100, 50 } });
-    number_input->set_value(0.0);
     scene.root->add_child(number_input);
 
     auto label = std::make_shared<ui_text>();

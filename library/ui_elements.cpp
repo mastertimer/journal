@@ -238,7 +238,7 @@ void ui_text_edit::set_size(size2i size)
 	update_regions(std::nullopt, region_change::add);
 }
 
-ui_number_input::ui_number_input(double step_, double minimum_, double maximum_, int decimal_places_)
+ui_number_input::ui_number_input(double step_, double minimum_, double maximum_, int decimal_places_, double default_value)
 	: step(std::isfinite(step_) && step_ > 0 ? step_ : 1.0),
 	  minimum(std::isfinite(minimum_) ? minimum_ : 0.0),
 	  maximum(std::isfinite(maximum_) ? maximum_ : 100.0),
@@ -276,7 +276,7 @@ ui_number_input::ui_number_input(double step_, double minimum_, double maximum_,
 			if (auto input = dynamic_cast<ui_number_input*>(button->parent)) input->change_value(1.0);
 	};
 	add_child(increase);
-	set_value(std::clamp(0.0, minimum, maximum));
+	set_value(default_value);
 }
 
 double ui_number_input::get_value() const
