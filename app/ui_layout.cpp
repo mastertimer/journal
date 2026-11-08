@@ -3,28 +3,30 @@
 
 void initialize_ui_scene(ui_scene& scene)
 {
-    auto text = std::make_shared<ui_text>();
-    text->set_text(L"Привет");
-    text->set_transform({ 1.0, { 100, 50 } });
-    scene.root->add_child(text);
-
-    auto text_edit = std::make_shared<ui_text_edit>();
-    text_edit->set_transform({ 1.0, { 100, 100 } });
-    text_edit->set_text(L"Ввод Текста");
-    scene.root->add_child(text_edit);
-    scene.keyboard_target = text_edit;
+    scene.data.types.push_back({ L"Вес", 0 });
 
     auto list = std::make_shared<ui_list>();
     list->set_transform({ 1.0, { 100, 150 } });
     scene.root->add_child(list);
 
-    auto button = std::make_shared<ui_button>();
-    button->set_transform({ 1.0, { 100, 350 } });
-    button->set_caption(L"Кнопка");
-    scene.root->add_child(button);
-
-    auto number_input = std::make_shared<ui_number_input>(0.25, -10.0, 10.0, 2);
-    number_input->set_transform({ 1.0, { 100, 400 } });
-    number_input->set_value(1.5);
+    auto number_input = std::make_shared<ui_number_input>(0.1, 0.0, 500.0, 1);
+    number_input->set_transform({ 1.0, { 100, 50 } });
+    number_input->set_value(0.0);
     scene.root->add_child(number_input);
+
+    auto label = std::make_shared<ui_text>();
+    label->set_text(L"Вес");
+    label->set_transform({ 1.0, { -55, 5 } });
+    number_input->add_child(label);
+
+    auto accept = std::make_shared<ui_button>();
+    accept->set_caption(L"Принять");
+    accept->set_transform({ 1.0, { 200, 0 } });
+    accept->on_click = [weak = std::weak_ptr<ui_element>(accept)]
+    {
+        if (auto button = weak.lock())
+            if (auto input = dynamic_cast<ui_number_input*>(button->parent))
+                if (input->scene) input->scene->data.add_entry(0, input->get_value());
+    };
+    number_input->add_child(accept);
 }

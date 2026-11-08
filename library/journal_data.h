@@ -26,6 +26,7 @@ struct journal_data
 	std::vector<journal_type> types;
 
 	const std::vector<journal_entry>& entries_by_type(size_t type_index);
+	void add_entry(size_t type_index, double value);
 
 private:
 	struct type_cache

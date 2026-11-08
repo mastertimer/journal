@@ -1,5 +1,12 @@
 #include "journal_data.h"
 
+void journal_data::add_entry(size_t type_index, double value)
+{
+	if (type_index >= types.size()) return;
+	entries.push_back({ std::chrono::system_clock::now(), type_index, value });
+	++types[type_index].version;
+}
+
 const std::vector<journal_entry>& journal_data::entries_by_type(size_t type_index)
 {
 	if (type_index >= types.size()) return empty_journal_entries;
