@@ -5,51 +5,8 @@
 #include <fstream>
 #include <iomanip>
 #include <iterator>
-#include <limits>
 #include <sstream>
-#include <stdexcept>
 #include <utility>
-#define NOMINMAX
-#include <Windows.h>
-
-namespace
-{
-	std::string to_utf8(const std::wstring& text)
-	{
-		if (text.empty()) return {};
-		if (text.size() > static_cast<size_t>(std::numeric_limits<int>::max()))
-			throw std::range_error("Text is too long to encode");
-
-		const int length = static_cast<int>(text.size());
-		const int byte_count = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, text.data(), length,
-			nullptr, 0, nullptr, nullptr);
-		if (!byte_count) throw std::range_error("Invalid Unicode text");
-
-		std::string result(byte_count, '\0');
-		if (!WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, text.data(), length,
-			result.data(), byte_count, nullptr, nullptr))
-			throw std::range_error("Failed to encode UTF-8");
-		return result;
-	}
-
-	std::wstring from_utf8(const std::string& text)
-	{
-		if (text.empty()) return {};
-		if (text.size() > static_cast<size_t>(std::numeric_limits<int>::max()))
-			throw std::range_error("Text is too long to decode");
-
-		const int length = static_cast<int>(text.size());
-		const int char_count = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, text.data(), length,
-			nullptr, 0);
-		if (!char_count) throw std::range_error("Invalid UTF-8 text");
-
-		std::wstring result(char_count, L'\0');
-		if (!MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, text.data(), length,
-			result.data(), char_count))
-			throw std::range_error("Failed to decode UTF-8");
-		return result;
-	}
-}
 
 std::wstring journal_entry::to_string() const
 {
@@ -120,15 +77,8 @@ bool journal_data::write_to_file(const std::filesystem::path& file_path) const
 		text += line.str();
 	}
 
-	try
-	{
-		const std::string utf8 = to_utf8(text);
-		file.write(utf8.data(), static_cast<std::streamsize>(utf8.size()));
-	}
-	catch (const std::range_error&)
-	{
-		return false;
-	}
+	const std::string bytes = wstring_to_string(text);
+	file.write(bytes.data(), static_cast<std::streamsize>(bytes.size()));
 	return file.good();
 }
 
@@ -138,15 +88,7 @@ bool journal_data::read_from_file(const std::filesystem::path& file_path)
 	if (!file) return false;
 	const std::string bytes((std::istreambuf_iterator<char>(file)), {});
 
-	std::wstring text;
-	try
-	{
-		text = from_utf8(bytes);
-	}
-	catch (const std::range_error&)
-	{
-		return false;
-	}
+	const std::wstring text = string_to_wstring(bytes);
 
 	std::wistringstream input(text);
 	std::vector<journal_type> loaded_types;

@@ -35,3 +35,48 @@ std::wstring crypt(std::wstring s)
     for (wchar_t& c : s) if (auto it = map.find(c); it != map.end()) c = it->second;
     return s;
 }
+
+std::wstring string_to_wstring(std::string_view s)
+{
+	static const wchar_t conv[256] = {
+		L'\x0', L'\x1', L'\x2', L'\x3', L'\x4', L'\x5', L'\x6', L'\x7', L'\x8', L'\x9', L'\xa', L'\xb', L'\xc', L'\xd',
+		L'\xe', L'\xf', L'\x10', L'\x11', L'\x12', L'\x13', L'\x14', L'\x15', L'\x16', L'\x17', L'\x18', L'\x19',
+		L'\x1a', L'\x1b', L'\x1c', L'\x1d', L'\x1e', L'\x1f', L' ', L'!', L'"', L'#', L'$', L'%', L'&', L'\'', L'(',
+		L')', L'*', L'+', L',', L'-', L'.', L'/', L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L':',
+		L';', L'<', L'=', L'>', L'?', L'@', L'A', L'B', L'C', L'D', L'E', L'F', L'G', L'H', L'I', L'J', L'K', L'L',
+		L'M', L'N', L'O', L'P', L'Q', L'R', L'S', L'T', L'U', L'V', L'W', L'X', L'Y', L'Z', L'[', L'\\', L']', L'^',
+		L'_', L'`', L'a', L'b', L'c', L'd', L'e', L'f', L'g', L'h', L'i', L'j', L'k', L'l', L'm', L'n', L'o', L'p',
+		L'q', L'r', L's', L't', L'u', L'v', L'w', L'x', L'y', L'z', L'{', L'|', L'}', L'~', L' ', L' ', L' ', L' ',
+		L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ',
+		L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ',
+		L' ', L'Ё', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L' ', L'ё',
+		L' ', L' ', L' ', L' ', L' ', L' ', L' ', L'А', L'Б', L'В', L'Г', L'Д', L'Е', L'Ж', L'З', L'И', L'Й', L'К',
+		L'Л', L'М', L'Н', L'О', L'П', L'Р', L'С', L'Т', L'У', L'Ф', L'Х', L'Ц', L'Ч', L'Ш', L'Щ', L'Ъ', L'Ы', L'Ь',
+		L'Э', L'Ю', L'Я', L'а', L'б', L'в', L'г', L'д', L'е', L'ж', L'з', L'и', L'й', L'к', L'л', L'м', L'н', L'о',
+		L'п', L'р', L'с', L'т', L'у', L'ф', L'х', L'ц', L'ч', L'ш', L'щ', L'ъ', L'ы', L'ь', L'э', L'ю', L'я'
+	};
+	std::wstring result(s.size(), L' ');
+	for (size_t i = 0; i < s.size(); ++i)
+		result[i] = conv[static_cast<unsigned char>(s[i])];
+	return result;
+}
+
+std::string wstring_to_string(std::wstring_view s)
+{
+	static const std::unordered_map<wchar_t, unsigned char> reverse = []
+	{
+		std::unordered_map<wchar_t, unsigned char> map;
+		for (int i = 0; i < 256; ++i)
+		{
+			const char byte = static_cast<char>(i);
+			const wchar_t character = string_to_wstring(std::string_view(&byte, 1))[0];
+			map.emplace(character, static_cast<unsigned char>(i));
+		}
+		return map;
+	}();
+	std::string result(s.size(), '?');
+	for (size_t i = 0; i < s.size(); ++i)
+		if (auto it = reverse.find(s[i]); it != reverse.end())
+			result[i] = static_cast<char>(it->second);
+	return result;
+}

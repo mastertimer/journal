@@ -3,10 +3,13 @@
 #include "base.h"
 #include <atomic>
 #include <chrono>
+#include <string_view>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::wstring crypt(std::wstring s);
+std::wstring string_to_wstring(std::string_view s);
+std::string wstring_to_string(std::wstring_view s);
 
 uint64_t next_id();
 
