@@ -33,6 +33,13 @@ constexpr color white_color = { 0xFFFFFFFF };
 constexpr color red_color   = { 0xFFFF0000 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct text_fit_result
+{
+	int fitting_characters = 0;
+	size2i text_size{};
+	std::vector<int> prefix_widths;
+};
+
 struct picture
 {
 	explicit picture(size2i s);
@@ -92,6 +99,7 @@ struct bitmap : public picture
 	void set_gdi_clip();
 	void text(ixy p, std::wstring_view s, int h, color tc, color bc = { 0 }, bool bold = false, int font_id = 0);
 	size2i size_text(std::wstring_view s, int h, bool bold = false, int font_id = 0);
+	text_fit_result measure_text_fit(std::wstring_view s, int h, int max_width, bool bold = false, int font_id = 0);
 
 private:
 	HFONT selected_font = nullptr;

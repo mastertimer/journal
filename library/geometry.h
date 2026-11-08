@@ -140,6 +140,7 @@ struct interval // [...])
 	bool touches_boundary(const interval& b) const;
 
 	bool empty() const { return (max < min) || (max == min && !right_closed); }
+	double length() const { return (min < max) ? (max - min) : 0.0; }
 	bool test(double b) const; // принадлежит ли точка области
 
 };

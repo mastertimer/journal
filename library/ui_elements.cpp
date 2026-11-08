@@ -197,14 +197,17 @@ bool ui_text_edit::mouse_click2(xy r)
 	int text_x = (int)local_region->x.min + 5;
 	int x = (int)r.x - text_x;
 	int position = (int)visible_text.min;
+	auto visible = std::wstring_view(text).substr(visible_text.min, visible_text.length());
+	auto measurement = scene->canvas.measure_text_fit(visible, sf, (int)local_region->x.length() - 8);
 	if (x > 0)
 	{
-		for (int i = (int)visible_text.min; i < visible_text.max; ++i)
+		int count = std::min(measurement.fitting_characters, (int)measurement.prefix_widths.size());
+		for (int i = 0; i < count; ++i)
 		{
-			i64 left = scene->canvas.size_text(std::wstring_view(text).substr(visible_text.min, i - visible_text.min), sf).x;
-			i64 right = scene->canvas.size_text(std::wstring_view(text).substr(visible_text.min, i + 1 - visible_text.min), sf).x;
+			int left = i == 0 ? 0 : measurement.prefix_widths[i - 1];
+			int right = measurement.prefix_widths[i];
 			if (x < left + (right - left + 1) / 2) break;
-			position = i + 1;
+			position = (int)visible_text.min + i + 1;
 		}
 	}
 	cursor = position;

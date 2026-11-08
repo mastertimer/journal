@@ -502,6 +502,35 @@ size2i bitmap::size_text(std::wstring_view s, int h, bool bold, int font_id)
 	return { a.cx, a.cy };
 }
 
+text_fit_result bitmap::measure_text_fit(std::wstring_view s, int h, int max_width, bool bold, int font_id)
+{
+	text_fit_result result;
+	if (s.empty()) return result;
+
+	auto hfont = get_font_from_cache(h, font_id, bold);
+	if (!hfont) return result;
+	if (selected_font != hfont)
+	{
+		SelectObject(hdc, hfont);
+		selected_font = hfont;
+	}
+
+	std::wstring terminated_text(s);
+	result.prefix_widths.resize(s.size());
+	SIZE text_size{};
+	int fitting_characters = 0;
+	int allowed_width = max_width > 0 ? max_width : 0;
+	if (!GetTextExtentExPointW(hdc, terminated_text.c_str(), (int)terminated_text.size(), allowed_width,
+		&fitting_characters, result.prefix_widths.data(), &text_size))
+	{
+		result.prefix_widths.clear();
+		return result;
+	}
+	result.fitting_characters = fitting_characters;
+	result.text_size = { text_size.cx, text_size.cy };
+	return result;
+}
+
 void bitmap::set_drawing_rect(const recti& q)
 {
 	picture::set_drawing_rect(q);
