@@ -287,6 +287,7 @@ ui_list::ui_list() : ui_element()
 	items.push_back(L"Элемент 4 В лесу родилась елечка");
 	items.push_back(L"Элемент 5");
 	items.push_back(L"Элемент 6");
+	selected_item = 3;
 }
 
 void ui_list::draw(transform tr)
@@ -299,6 +300,7 @@ void ui_list::draw(transform tr)
 
 	draw_scroll_bar(bounds, scaled_font_size);
 	draw_items(bounds, scaled_font_size);
+	draw_selected_item(bounds, scaled_font_size);
 }
 
 void ui_list::draw_frame(recti bounds)
@@ -316,14 +318,9 @@ bool ui_list::prepare_layout(recti bounds, int scaled_font_size)
 	if (visible_items_count < 1) return false;
 
 	int item_count = (int)items.size();
-	if (selected_item)
-	{
-		*selected_item = std::clamp(*selected_item, 0, item_count - 1);
-		if (first_item > *selected_item) first_item = *selected_item;
-		if (first_item + visible_items_count <= *selected_item)
-			first_item = *selected_item - visible_items_count + 1;
-	}
 	first_item = std::clamp(first_item, 0, std::max(0, item_count - visible_items_count));
+	if (selected_item && (*selected_item < first_item || *selected_item >= first_item + visible_items_count))
+		selected_item.reset();
 	return true;
 }
 
@@ -352,7 +349,7 @@ void ui_list::draw_items(recti bounds, int scaled_font_size)
 		bounds.x.max -= scaled_font_size + 3;
 
 	int last_item = std::min((int)items.size(), first_item + visible_items_count);
-	int text_width = (int)bounds.x.length() - 2;
+	int text_width = (int)bounds.x.length() - 6;
 	for (int item = first_item; item < last_item; ++item)
 	{
 		int row = item - first_item;
@@ -360,7 +357,20 @@ void ui_list::draw_items(recti bounds, int scaled_font_size)
 		auto fit = scene->canvas.measure_text_fit(text, scaled_font_size, text_width);
 		int fitting_characters = std::clamp(fit.fitting_characters, 0, (int)text.size());
 		text = text.substr(0, fitting_characters);
-		scene->canvas.text(bounds.top_left() + ixy(2, element_height * row + 1),
+		scene->canvas.text(bounds.top_left() + ixy(4, element_height * row + 1),
 			text, scaled_font_size, ui_list_text_color, { 0 });
 	}
+}
+
+void ui_list::draw_selected_item(recti bounds, int scaled_font_size)
+{
+	if (!selected_item) return;
+	if ((int)items.size() > visible_items_count)
+		bounds.x.max -= scaled_font_size + 3;
+
+	int row = *selected_item - first_item;
+	intervali item_x{ bounds.x.min + 2, bounds.x.max - 1 };
+	intervali item_y{ bounds.y.min + 1 + element_height * row,
+		bounds.y.min + 1 + element_height * (row + 1) };
+	scene->canvas.rectangle({ item_x, item_y }, ui_list_selected_item_color);
 }

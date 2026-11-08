@@ -122,6 +122,7 @@ constexpr int ui_list_scroll_bar_indent = 2;
 constexpr color ui_list_line_color = { 0xFFFFFFFF };
 constexpr color ui_list_text_color = { 0xFFFFFFFF };
 constexpr color ui_list_scroll_bar_color = { 0xFFFFFFFF };
+constexpr color ui_list_selected_item_color = { 0xFF00FF00 };
 
 struct ui_list : public ui_element
 {
@@ -142,4 +143,5 @@ private:
 	bool prepare_layout(recti bounds, int scaled_font_size);
 	void draw_scroll_bar(recti bounds, int scaled_font_size);
 	void draw_items(recti bounds, int scaled_font_size);
+	void draw_selected_item(recti bounds, int scaled_font_size);
 };
