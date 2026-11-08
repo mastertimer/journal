@@ -10,6 +10,7 @@ struct ui_scene
 
 	std::shared_ptr<ui_element> root;
 	std::weak_ptr<ui_element> keyboard_target;
+	std::weak_ptr<ui_element> mouse_target;
 	std::weak_ptr<ui_element> mouse_capture;
 	transform mouse_capture_transform;
 

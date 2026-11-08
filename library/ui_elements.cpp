@@ -83,14 +83,11 @@ rect& ui_element::calc_local_region()
 bool ui_element::mouse_move(xy screen_mouse_pos, transform tr)
 {
 	tr *= trans_;
-	if (!tr(calc_combined_region()).test(screen_mouse_pos))
-	{
-		mouse_leave2();
-		for (auto& element : children) element->mouse_move(screen_mouse_pos, tr);
-		return false;
-	}
+	if (!tr(calc_combined_region()).test(screen_mouse_pos)) return false;
 	for (auto& element : children) if (element->mouse_move(screen_mouse_pos, tr)) return true;
-	return tr(calc_local_region()).test(screen_mouse_pos) && mouse_move2(screen_mouse_pos, tr);
+	if (!tr(calc_local_region()).test(screen_mouse_pos)) return false;
+	scene->mouse_target = shared_from_this();
+	return mouse_move2(screen_mouse_pos, tr);
 }
 
 bool ui_element::mouse_click(xy screen_mouse_pos, transform tr)

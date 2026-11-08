@@ -53,7 +53,12 @@ void ui_scene::mouse_move(short x, short y, bool left_button_down)
 		captured->mouse_up2(screen_mouse_pos, mouse_capture_transform);
 		mouse_capture.reset();
 	}
+	auto previous_target = mouse_target.lock();
+	mouse_target.reset();
 	root->mouse_move(screen_mouse_pos);
+	auto current_target = mouse_target.lock();
+	if (previous_target && previous_target != current_target)
+		previous_target->mouse_leave2();
 }
 
 void ui_scene::mouse_click(short x, short y)
