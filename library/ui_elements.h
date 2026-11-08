@@ -52,6 +52,7 @@ protected:
 	virtual void draw(transform tr) {}
 
 private:
+	void set_scene(ui_scene* value);
 	transform trans_;
 };
 

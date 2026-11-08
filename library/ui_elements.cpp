@@ -26,8 +26,15 @@ void ui_element::add_child(std::shared_ptr<ui_element> element)
 {
 	children.push_back(element);
 	element->parent = this;
-	element->scene = scene;
+	element->set_scene(scene);
 	element->update_regions(std::nullopt, region_change::add);
+}
+
+void ui_element::set_scene(ui_scene* value)
+{
+	scene = value;
+	for (auto& element : children)
+		element->set_scene(value);
 }
 
 void ui_element::update_regions(std::optional<rect> r, region_change change)
