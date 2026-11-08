@@ -78,7 +78,18 @@ bool ui_element::mouse_click(xy screen_mouse_pos, transform tr)
 	tr *= trans;
 	if (!tr(calc_combined_region()).test(screen_mouse_pos)) return false;
 	for (auto& element : children) if (element->mouse_click(screen_mouse_pos, tr)) return true;
-	return tr(calc_local_region()).test(screen_mouse_pos) && mouse_click2(screen_mouse_pos, tr);
+	if (tr(calc_local_region()).test(screen_mouse_pos) && mouse_click2(screen_mouse_pos, tr))
+	{
+		auto previous_target = scene->keyboard_target.lock();
+		if (previous_target.get() != this)
+		{
+			scene->keyboard_target = shared_from_this();
+			if (previous_target) previous_target->update_regions({}, region_change::modify);
+			update_regions({}, region_change::modify);
+		}
+		return true;
+	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,7 +141,10 @@ void ui_text_edit::draw(transform tr)
 void ui_text_edit::draw_frame(recti bounds)
 {
 	scene->canvas.fill_rectangle(bounds.expanded(-1), black_color);
-	scene->canvas.rectangle(bounds, white_color);
+	color frame_color = scene->keyboard_target.lock().get() == this
+		? ui_active_element_frame_color
+		: white_color;
+	scene->canvas.rectangle(bounds, frame_color);
 }
 
 void ui_text_edit::draw_visible_text(recti bounds, int scaled_font_size, i64 top_indent)
@@ -306,7 +320,10 @@ void ui_list::draw(transform tr)
 void ui_list::draw_frame(recti bounds)
 {
 	scene->canvas.fill_rectangle(bounds.expanded(-1), black_color);
-	scene->canvas.rectangle(bounds, white_color);
+	color frame_color = scene->keyboard_target.lock().get() == this
+		? ui_active_element_frame_color
+		: white_color;
+	scene->canvas.rectangle(bounds, frame_color);
 }
 
 bool ui_list::prepare_layout(recti bounds, int scaled_font_size)
