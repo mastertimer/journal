@@ -93,8 +93,7 @@ private:
 	std::wstring text;
 	int font_size = default_font_size;
 	int cursor = 0; // абсолютное положение курсора
-	int visible_text_begin = 0; // индекс первого отображаемого символа
-	int visible_text_end = 0; // индекс после последнего отображаемого символа
+	intervali visible_text; // диапазон отображаемых символов [min, max)
 
 	void update_visible_text(int scaled_font_size, int available_width);
 	void draw_frame(recti bounds);

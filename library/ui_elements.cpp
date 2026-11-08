@@ -135,20 +135,20 @@ void ui_text_edit::draw_frame(recti bounds)
 
 void ui_text_edit::draw_visible_text(recti bounds, int scaled_font_size, i64 top_indent)
 {
-	if (visible_text_begin < visible_text_end)
+	if (!visible_text.empty())
 		scene->canvas.text({ bounds.x.min + 5, bounds.y.min + top_indent },
-			text.substr(visible_text_begin, visible_text_end - visible_text_begin),
+			text.substr(visible_text.min, visible_text.length()),
 			scaled_font_size, white_color, { 0 });
 
-	if (visible_text_begin > 0)
+	if (visible_text.min > 0)
 		scene->canvas.vertical_line(bounds.x.min + 2, bounds.y.expanded(-1), { 0xFF30C0F0 });
-	if (visible_text_end < (int)text.size())
+	if (visible_text.max < (int)text.size())
 		scene->canvas.vertical_line(bounds.x.max - 3, bounds.y.expanded(-1), { 0xFF30C0F0 });
 }
 
 void ui_text_edit::draw_cursor(recti bounds, int scaled_font_size, i64 top_indent)
 {
-	auto cursor_text = text.substr(visible_text_begin, cursor - visible_text_begin);
+	auto cursor_text = text.substr(visible_text.min, cursor - visible_text.min);
 	i64 cursor_offset = scene->canvas.size_text(cursor_text, scaled_font_size).x;
 	scene->canvas.vertical_line(bounds.x.min + 4 + cursor_offset,
 		{ bounds.y.min + top_indent, bounds.y.min + scaled_font_size + top_indent }, white_color);
@@ -158,11 +158,11 @@ void ui_text_edit::update_visible_text(int scaled_font_size, int available_width
 {
 	int text_length = (int)text.size();
 	cursor = std::clamp(cursor, 0, text_length);
-	visible_text_begin = std::clamp(visible_text_begin, 0, cursor);
-	visible_text_end = std::clamp(visible_text_end, cursor, text_length);
+	visible_text.min = std::clamp((int)visible_text.min, 0, cursor);
+	visible_text.max = std::clamp((int)visible_text.max, cursor, text_length);
 	if (available_width <= 3)
 	{
-		visible_text_begin = visible_text_end = cursor;
+		visible_text = { cursor, cursor };
 		return;
 	}
 
@@ -170,15 +170,15 @@ void ui_text_edit::update_visible_text(int scaled_font_size, int available_width
 	{
 		return scene->canvas.size_text(text.substr(begin, end - begin), scaled_font_size).x;
 	};
-	while (visible_text_end > visible_text_begin && width(visible_text_begin, visible_text_end) > available_width)
+	while (visible_text.max > visible_text.min && width((int)visible_text.min, (int)visible_text.max) > available_width)
 	{
-		if (visible_text_end > cursor) --visible_text_end;
-		else ++visible_text_begin;
+		if (visible_text.max > cursor) --visible_text.max;
+		else ++visible_text.min;
 	}
-	while (visible_text_end < text_length && width(visible_text_begin, visible_text_end + 1) <= available_width)
-		++visible_text_end;
-	while (visible_text_begin > 0 && width(visible_text_begin - 1, visible_text_end + 1) <= available_width)
-		--visible_text_begin, ++visible_text_end;
+	while (visible_text.max < text_length && width((int)visible_text.min, (int)visible_text.max + 1) <= available_width)
+		++visible_text.max;
+	while (visible_text.min > 0 && width((int)visible_text.min - 1, (int)visible_text.max + 1) <= available_width)
+		--visible_text.min, ++visible_text.max;
 }
 
 void ui_text_edit::set_text(std::wstring_view t)
@@ -186,8 +186,8 @@ void ui_text_edit::set_text(std::wstring_view t)
 	if (text == t) return;
 	text = t;
 	cursor = std::min(cursor, (int)text.size());
-	visible_text_begin = std::min(visible_text_begin, cursor);
-	visible_text_end = cursor;
+	visible_text.min = std::min((int)visible_text.min, cursor);
+	visible_text.max = cursor;
 	update_regions(std::nullopt, region_change::modify);
 }
 
@@ -196,13 +196,13 @@ bool ui_text_edit::mouse_click2(xy r)
 	int sf = font_size;
 	int text_x = (int)local_region->x.min + 5;
 	int x = (int)r.x - text_x;
-	int position = visible_text_begin;
+	int position = (int)visible_text.min;
 	if (x > 0)
 	{
-		for (int i = visible_text_begin; i < visible_text_end; ++i)
+		for (int i = (int)visible_text.min; i < visible_text.max; ++i)
 		{
-			i64 left = scene->canvas.size_text(std::wstring_view(text).substr(visible_text_begin, i - visible_text_begin), sf).x;
-			i64 right = scene->canvas.size_text(std::wstring_view(text).substr(visible_text_begin, i + 1 - visible_text_begin), sf).x;
+			i64 left = scene->canvas.size_text(std::wstring_view(text).substr(visible_text.min, i - visible_text.min), sf).x;
+			i64 right = scene->canvas.size_text(std::wstring_view(text).substr(visible_text.min, i + 1 - visible_text.min), sf).x;
 			if (x < left + (right - left + 1) / 2) break;
 			position = i + 1;
 		}
